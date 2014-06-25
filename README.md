@@ -22,6 +22,7 @@ Para poder utilizar esta aplicación se deberá tener instaladas las siguientes 
 
 ## Descripción general: ##
 La presente herramienta propone el uso de la librerìa de 39Peers desarrollada por Kundan Singh para el desarrollo de una herramienta interactiva que permita auditar sistemas VoIP basados en SIP.
+
 1.   **Flooding**
 2.   **Fuzzing**
 3.   **Spoofing**
@@ -89,6 +90,7 @@ La presente herramienta propone el uso de la librerìa de 39Peers desarrollada p
                         for SIPOT. Default is flooding.
 ### Ejemplos de prueba ###
 Registrar una extensión SIP:
+
 `python sipot.py --register --username 109 --pwd abc123 --reg-ip 192.168.56.77`
 
 ## Módulos: ##
@@ -96,6 +98,14 @@ La presente herramienta consta de (3) módulos principales, con sus diferentes o
 
 ### Flooding ###
 _**Estado:** En desarrollo._
+
+#### Descripción ####
+
+> [Flood](http://es.wikipedia.org/wiki/Flood)  es un término en inglés que significa literalmente inundación.Se usa en la jerga informática para designar un comportamiento abusivo de la red de comunicaciones, normalmente por la repetición desmesurada de algún mensaje en un corto espacio de tiempo.
+
+Este módulo se encarga del envío de mensajes SIP a la dirección destino en un flujo continuo e ininterrumpido. El objetivo del módulo es sobrecargar el servidor y generar denegación de servicios por uso de la red, sobrecarga de memoria o carga de CPU.
+El uso del módulo es muy sencillo pero efectivo. Los mensajes son generados a partir del método seleccionado (`--flood-method`) o de un archivo que lo contenga (`--flood-msg-file`). La aplicación enviará la cantidad deseada de mensajes  (`--flood-number`) en forma constante al objetivo seleccionado (`--to`). En este modo de uso, la aplicación no escuchará las respuestas proporcionadas por el objetivo.
+
 #### Opciones ####
     --flood-number=FLOOD_NUM
                         Sets the number of messages to be sent by flooding
@@ -110,10 +120,15 @@ _**Estado:** En desarrollo._
 
 #### Ejemplos ####
 Flood 500 Msg to 192.168.56.77:
+
 `python sipot.py --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500`
+
 Flood 500 Msg from File to 192.168.56.77:
+
 `python sipot.py --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --flood-msg-file sipot_flood_this.txt`
+
 Flood 500 Msg to 192.168.56.77 changing extentions with dictionary:
+
 `python sipot.py --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary sipot_ext_dict_example.txt` 
 
 
@@ -129,6 +144,7 @@ _**Estado:** No desarrollado aún._
 
 
 [Markup Preview](http://github-markup.dfilimonov.com/)
+[MultiMarkdown](https://github.com/fletcher/MultiMarkdown/blob/master/Documentation/Markdown%20Syntax.md)
 
 
 
