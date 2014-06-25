@@ -1,0 +1,12 @@
+INVITE sip:192.168.56.77:5060 SIP/2.0
+Content-Length: 0
+Via: SIP/2.0/UDP 127.0.1.1:5062;rport;branch=z9hG4bKl7EYxhSzgpVQ5-hv9-60-A..
+From: <sip:109@192.168.56.77>;tag=66098246158
+Expires: 3600
+To: <sip:109@192.168.56.77:5060>
+Contact: <sip:109@127.0.1.1:5062>
+CSeq: 4 REGISTER
+Max-Forwards: 70
+Call-ID: 785850338@127.0.1.1
+
+
