@@ -24,7 +24,6 @@ __desc__ = "SIP Open Tester"
 import os, sys, traceback, socket, multitask, random, logging
 
 try:
-	from app import voip
 	from std import rfc3261, rfc2396, rfc3550, rfc4566, kutil, rfc3489bis
 	from external import log
 	
@@ -50,6 +49,8 @@ if __name__ == '__main__':
 	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --flood-msg-file example_sipot_flood.txt \r\n"
 	usage += "\t *** Flood 500 Msg to 192.168.56.77 changing extentions with dictionary: ***\r\n"
 	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary example_sipot_ext_dict.txt \r\n"
+	usage += "Fuzzing mode:\r\n"
+	usage += "Spoofing mode:\r\n"
 	usage += "\r\n"
 	
 	parser = OptionParser(usage,version="%prog v"+str(__version__)+__GPL__)
@@ -160,7 +161,7 @@ class bcolors:
 
 class User(object):
 	'''The User object provides a layer between the application and the SIP stack.'''
-	REGISTERED, FLOODING, UDP, TCP, TLS = 'Registered user','User flooding', 'udp', 'tcp', 'tls' # transport values
+	REGISTERED, UDP, TCP, TLS = 'Registered user','udp', 'tcp', 'tls' # transport values
 	def __init__(self, app):
 		self.app = app
 		self.state = self.reg_state = None
@@ -182,7 +183,7 @@ class User(object):
 		self.password = app.options.password 
 		self.registrarAddr = rfc2396.Address(str('<sip:'+self.reg_username+'@'+app.options.registrar_ip+'>'))
 		# Generators
-		self._listenerGen = self._registerGen = self._floodGen = None
+		self._listenerGen = self._registerGen = None
 		# create a SIP stack instance
 		self.transport = rfc3261.TransportInfo(self.sock, secure=(app.options.transport == self.TLS))
 		self._stack = rfc3261.Stack(self, self.transport, fix_nat=app.options.fix_nat)
@@ -214,8 +215,6 @@ class User(object):
 			self._listenerGen.close()
 		if self._registerGen:
 			self._registerGen.close()
-		if self._floodGen:
-			self._floodGen.close()
 		self._registerGen = None
 		return self
 	#-------------------- Internal ---------------------------------
@@ -233,7 +232,7 @@ class User(object):
 		packet size to receive is 1500 bytes. The interval argument specifies how
 		often should the sock be checked for close, default is 180 s.
 		This is a generator function and should be invoked as multitask.add(u._listener()).'''
-		app.status.append('Listener Generator Initiated')
+		self.app.status.append('Listener Generator Initiated')
 		try:
 			while self.sock and self._stack:
 				try:
@@ -252,11 +251,11 @@ class User(object):
 		if self.reg_result=='success': 
 			if self.reg_state == None:
 				self.reg_state = self.REGISTERED
-				app.status.append(bcolors.OKGREEN+"Register succesful!"+bcolors.ENDC +" (user: "+self.app.options.username+", password: "+self.app.options.password+")")
-		else: app.status.append('Register result: '+self.reg_result+'. Reason: '+self.reg_reason)
+				self.app.status.append(bcolors.OKGREEN+"Register succesful!"+bcolors.ENDC +" (user: "+self.app.options.username+", password: "+self.app.options.password+")")
+		else: self.app.status.append('Register result: '+self.reg_result+'. Reason: '+self.reg_reason)
 	def _registerUA(self):
 		if self.reg_state == None:
-			app.status.append('Register Generator Initiated')
+			self.app.status.append('Register Generator Initiated')
 		try:
 			if self.reg_refresh and self._ua.gen:
 				yield multitask.sleep(self.register_interval - min(self.register_interval*0.05, 5)) # refresh about 5 seconds before expiry
@@ -360,7 +359,7 @@ class User(object):
 	def createTimer(self, app, stack):
 		'''Callback to create a timer object.'''
 		return kutil.Timer(app)
-	# rfc3261.Transport related methods - FLOODER!
+	# rfc3261.Transport related methods
 	def send(self, data, addr, stack):
 		'''Send data to the remote addr.'''
 		def _send(self, data, addr): # generator version
@@ -403,8 +402,8 @@ class App(object):
 		
 	def start(self):
 		self.createUser()
-		if not self.options.sipot_mode=='flooding': self.user = self.user.add_listenerGen()
-		if not self.options.sipot_mode=='flooding' and self.options.register: self.user.add_registerGen()
+		self.user = self.user.add_listenerGen()
+		if self.options.register: self.user.add_registerGen()
 		# RUN MULTITASK: multitask.run()
 		self.RUNNING
 		TaskManager = multitask.get_default_task_manager()
@@ -417,7 +416,7 @@ class App(object):
 		return self
 		
 	def mainController(self):
-		logger.info("ntsga: start flooding controller")
+		logger.info("ntsga: start main default controller")
 		while True:
 			if self.status:
 				print self.status.pop(0)
@@ -442,6 +441,11 @@ if __name__ == '__main__':
         if options.sipot_mode == 'flooding':
 			import module_flooder
 			app = module_flooder.FloodingApp(options)
+        if options.sipot_mode == 'fuzzing':
+			import module_fuzzer
+        if options.sipot_mode == 'spoofing':
+			import module_spoofer
+			app = module_spoofer.SpoofingApp(options)
         if not 'app' in globals(): app = App(options)
         app.start()
     except KeyboardInterrupt:

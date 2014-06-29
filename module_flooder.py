@@ -6,17 +6,26 @@ from sipot import App, User, logger
 
 class flooderUser(User):
 	'''The User object provides a layer between the application and the SIP stack.'''
-	REGISTERED, FLOODING, UDP, TCP, TLS = 'Registered user','User flooding', 'udp', 'tcp', 'tls' # transport values
+	FLOODING = 'User flooding'
 	def __init__(self, app):
 		User.__init__(self,app)
         #Flooder options
-		self.wait_register = app.options.register
+		self._floodGen = None
 		self.flood_num = app.options.flood_num
 		self.flood_method = app.options.flood_method
 		self.flood_msg = 0
 		self.start_flood_time = None
 		self.flood_msg_file = app.options.flood_msg_file
-	
+	def stop(self):
+		if self._listenerGen:
+			self._listenerGen.close()
+		if self._registerGen:
+			self._registerGen.close()
+		if self._floodGen:
+			self._floodGen.close()
+		self._registerGen = None
+		return self
+		
 	def add_floodGen(self):
 		self.state = self.FLOODING
 		if not self._floodGen:
@@ -60,7 +69,7 @@ class flooderUser(User):
 					try:
 						dictionary = open(self.app.options.ExtDictionary,'r')
 					except IOError:
-						logging.error( "Could not open %s" % self.app.options.ExtDictionary )
+						logger.error( "Could not open %s" % self.app.options.ExtDictionary )
 						exit(1)
 					self.ExtensionsGenerator =  loopExtentionsDictionary(dictionary)
 				else:
@@ -129,8 +138,17 @@ class flooderUser(User):
 class FloodingApp(App):
 	def __init__(self, options):
 		App.__init__(self,options)
-		logger.info("ntsga: init fuzzing app")
+		logger.info("ntsga: init flooding app")
 
+	def start(self):
+		self.createUser()
+		# RUN MULTITASK: multitask.run()
+		self.RUNNING
+		TaskManager = multitask.get_default_task_manager()
+		while self.RUNNING and (TaskManager.has_runnable() or TaskManager.has_io_waits() or TaskManager.has_timeouts()):
+			TaskManager.run_next()
+		return self
+		
 	def createUser(self):
 		self.user = flooderUser(self).createClient()
 		return self
@@ -143,19 +161,3 @@ class FloodingApp(App):
 				self.stop()
 				raise StopIteration()
 			yield
-		# Not needed for FLOODING ...
-		if self.status: # Print app status
-			print self.status.pop(0)
-		# If not register needed or already registered => flood
-		if not self.options.register or (self.options.register and self.user.reg_state==self.user.REGISTERED):
-			while True:
-				self.user.add_floodGen()
-				if not self.user.state == self.user.FLOODING:
-					self.stop()
-					raise StopIteration()
-		# If register needed and could not register = > stop app
-		elif not (self.user.reg_result=='success' or self.user.reg_result==None):
-			print 'Could not register user.'
-			self.stop()
-			raise StopIteration()
-		yield
