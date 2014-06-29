@@ -120,15 +120,12 @@ El uso del módulo es muy sencillo pero efectivo. Los mensajes son generados a p
 
 #### Ejemplos ####
 Flood 500 Msg to 192.168.56.77:
-
 `python sipot.py --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500`
 
 Flood 500 Msg from File to 192.168.56.77:
-
 `python sipot.py --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --flood-msg-file sipot_flood_this.txt`
 
 Flood 500 Msg to 192.168.56.77 changing extentions with dictionary:
-
 `python sipot.py --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary sipot_ext_dict_example.txt` 
 
 
