@@ -27,7 +27,7 @@ try:
 	from app import voip
 	from std import rfc3261, rfc2396, rfc3550, rfc4566, kutil, rfc3489bis
 	from external import log
-	import sipot_flooder
+	
 except ImportError: print 'Please install p2p-sip and include p2p-sip/src and p2p-sip/src/external in your PYTHONPATH'; traceback.print_exc(); sys.exit(1)
 logger = logging.getLogger('app') # debug(), info(), warning(), error() and critical()
 
@@ -439,7 +439,9 @@ class App(object):
 if __name__ == '__main__': 
     try:
         print "------------------------------------------------------------------------------------------------------------"
-        if options.sipot_mode == 'flooding': app = sipot_flooder.FloodingApp(options)
+        if options.sipot_mode == 'flooding':
+			import sipot_flooder
+			app = sipot_flooder.FloodingApp(options)
         if not 'app' in globals(): app = App(options)
         app.start()
     except KeyboardInterrupt:

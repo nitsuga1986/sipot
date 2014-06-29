@@ -23,6 +23,7 @@ class flooderUser(User):
 			self._floodGen  = self._flood()
 			multitask.add(self._floodGen)
 		return self
+	
 	def _flood(self):
 		# Flood info messages ---------
 		def floodingCtrl():
