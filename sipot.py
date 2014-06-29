@@ -47,9 +47,9 @@ if __name__ == '__main__':
 	usage += "\t *** Flood 500 Msg to 192.168.56.77: ***\r\n"
 	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 \r\n"
 	usage += "\t *** Flood 500 Msg from File to 192.168.56.77: ***\r\n"
-	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --flood-msg-file sipot_flood_this.txt \r\n"
+	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --flood-msg-file example_sipot_flood.txt \r\n"
 	usage += "\t *** Flood 500 Msg to 192.168.56.77 changing extentions with dictionary: ***\r\n"
-	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary sipot_ext_dict_example.txt \r\n"
+	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary example_sipot_ext_dict.txt \r\n"
 	usage += "\r\n"
 	
 	parser = OptionParser(usage,version="%prog v"+str(__version__)+__GPL__)
@@ -440,8 +440,8 @@ if __name__ == '__main__':
     try:
         print "------------------------------------------------------------------------------------------------------------"
         if options.sipot_mode == 'flooding':
-			import sipot_flooder
-			app = sipot_flooder.FloodingApp(options)
+			import module_flooder
+			app = module_flooder.FloodingApp(options)
         if not 'app' in globals(): app = App(options)
         app.start()
     except KeyboardInterrupt:
