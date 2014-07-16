@@ -87,7 +87,7 @@ class flooderUser(User):
 				while True:
 					yield (message_generated)
 		# Dest Address
-		addr =  self.remoteTarget.uri.hostPort 
+		addr = self.remoteTarget.uri
 		if addr and isinstance(addr, rfc2396.URI):
 			if not addr.host: raise ValueError, 'No host in destination uri'
 			addr = (addr.host, addr.port or self.transport.type == 'tls' and self.transport.secure and 5061 or 5060)

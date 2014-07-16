@@ -2,6 +2,12 @@ SIPOT: SIP Open Tester
 ========
 **Herramienta para auditar sistemas VoIP basados en SIP**
 
+### Implementa 3 módulos: ###
+*   **Flooder:** Realizar [flooding](http://es.wikipedia.org/wiki/Flood) sobre un objetivo.
+*   **Fuzzer:** Realizar [fuzz testing](http://en.wikipedia.org/wiki/Fuzz_testing) sobre un objetivo.
+*   **Spoofer:** Utlizar técnicas de [spoofing](http://es.wikipedia.org/wiki/Spoofing) sobre un objetivo
+
+
 ## Dependencias: ##
 Para poder utilizar esta aplicación se deberá tener instaladas las siguientes dependencias y estar vinculadas en PYTHONPATH para su importación.
 
@@ -17,7 +23,7 @@ Para poder utilizar esta aplicación se deberá tener instaladas las siguientes 
 
 *   **Link:** [Multitask 0.2.0](https://pypi.python.org/pypi/multitask/).
 *   **Licencia:** MIT License.
-*   **Uso:** Para generar tareas simultaneas sin bloquera los sockets.
+*   **Uso:** Para generar tareas simultaneas.
 
 
 ## Descripción general: ##

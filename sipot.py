@@ -61,14 +61,14 @@ if __name__ == '__main__':
 	group1 = OptionGroup(parser, 'Network', 'Use these options for network configuration')
 	group1.add_option('',   '--transport', dest='transport', default='udp', help='the transport type is one of "udp", "tcp" or "tls". Default is "udp"')
 	group1.add_option('',   '--int-ip',  dest='int_ip',  default='0.0.0.0', help='listening IP address for SIP and RTP. Use this option only if you wish to select one out of multiple IP interfaces. Default "0.0.0.0"')
-	group1.add_option('',   '--port',    dest='port',    default=5062, type="int", help='listening port number for SIP UDP/TCP. TLS is one more than this. Default is 5092')
+	group1.add_option('',   '--port',    dest='port',    default=5060, type="int", help='listening port number for SIP UDP/TCP. TLS is one more than this. Default is 5092')
 	group1.add_option('',   '--fix-nat', dest='fix_nat', default=False, action='store_true', help='enable fixing NAT IP address in Contact')
 	group1.add_option('',   '--max-size',dest='max_size', default=4096, type='int', help='size of received socket data. Default is 4096')
 	group1.add_option('',   '--interval',dest='interval', default=180, type='int', help='The interval argument specifies how often should the sock be checked for close, default is 180 s')
 	parser.add_option_group(group1)
     
 	group2 = OptionGroup(parser, 'SIP', 'Use these options for SIP configuration')
-	group2.add_option('','--username',dest='username',default=default_login,help='username to use in my SIP URI and contacts. Default is "%s"'%(default_login,))
+	group2.add_option('','--username',dest='username',default=None,help='username to use in my SIP URI and contacts. Default is "%s"'%(default_login,))
 	group2.add_option('','--pwd', dest='password', default='', help='set this if REGISTER requires pasword authentication. Default is empty "" to not set.  A list of passwords can be provided in the form of pwd1,pwd1,...,etc.')
 	group2.add_option('','--domain',dest='domain',  default=default_domain, help='domain portion of my SIP URI. Default is to use local hostname, which is "%s"'%(default_domain,))
 	group2.add_option('','--proxy',dest='proxy',   default='', help='IP address of the SIP proxy to use. Default is empty "" to mean disable outbound proxy')
@@ -91,14 +91,19 @@ if __name__ == '__main__':
 	group4.add_option('',   '--flood-number', dest='flood_num', default=666, type="int", help='Sets the number of messages to be sent by flooding mode. Default is 500.')
 	group4.add_option('',   '--flood-method', dest='flood_method', default='REGISTER', help='Set the method to flood. Default is REGISTER.')
 	group4.add_option('',   '--flood-msg-file', dest='flood_msg_file', default=None, help='Provide a message from file to flood.')
-	
-	group5 = OptionGroup(parser, 'Generate Extention options', 'Extensions options for flooding. Changes the originator extention in each message.')
-	group4.add_option('',   '--no-modify-ext',dest='modify_extentions', default=True, action='store_false', help='If not specified, extentions will be modified in each message flooded. To generate extentions options --ext-dictionary &--ext-range  will be used.')
-	group5.add_option('',   "--ext-dictionary", dest="ExtDictionary", type="string",help="Specify a dictionary file with possible extension names")
-	group5.add_option('',   "--ext-range", dest="ExtRange", default='100-999',metavar="RANGE",help="Specify an extension or extension range\r\nexample: -e 100-999,1000-1500,9999")
-	group5.add_option('',   "--ext-range-zeropadding", dest="ExtZeropadding", type="int",help="""the number of zeros used to padd the username.the options "-e 1-9999 -z 4" would give 0001 0002 0003 ... 9999""")
-	group5.add_option('',   '--ext-range-template',  dest="ExtTemplate",action="store",help="""A format string which allows us to specify a template for the extensions example svwar.py -e 1-999 --template="123%#04i999" would scan between 1230001999 to 1230999999" """)
-	group5.add_option('',   '--ext-range-enabledefaults', dest="ExtDefaults", action="store_true", default=False, help="""Scan for default / typical extensions such as 1000,2000,3000 ... 1100, etc. This option is off by default. Use --enabledefaults to enable this functionality""")
+    
+	group5 = OptionGroup(parser, 'Fuzzing Mode', 'use this options to set fuzzing parameters')
+	group5.add_option('',   '--fuzz-dialog',dest='fuzz_dialog', default=False, action='store_true', help='By default fuzz only method defined (REGISTER by default). If selected will fuzz method inside a dialog.')
+	group5.add_option('',   '--fuzz-method', dest='fuzz_method', default='REGISTER', help='Set the method to flood. Default is REGISTER.')
+	group5.add_option('',   '--fuzz-msg-file', dest='fuzz_msg_file', default=None, help='Provide a message from file to fuzz.')
+
+	group6 = OptionGroup(parser, 'Generate Extention options', 'Extensions options for flooding. Changes the originator extention in each message.')
+	group6.add_option('',   '--no-modify-ext',dest='modify_extentions', default=True, action='store_false', help='If not specified, extentions will be modified in each message flooded. To generate extentions options --ext-dictionary &--ext-range  will be used.')
+	group6.add_option('',   "--ext-dictionary", dest="ExtDictionary", type="string",help="Specify a dictionary file with possible extension names")
+	group6.add_option('',   "--ext-range", dest="ExtRange", default='100-999',metavar="RANGE",help="Specify an extension or extension range\r\nexample: -e 100-999,1000-1500,9999")
+	group6.add_option('',   "--ext-range-zeropadding", dest="ExtZeropadding", type="int",help="""the number of zeros used to padd the username.the options "-e 1-9999 -z 4" would give 0001 0002 0003 ... 9999""")
+	group6.add_option('',   '--ext-range-template',  dest="ExtTemplate",action="store",help="""A format string which allows us to specify a template for the extensions example svwar.py -e 1-999 --template="123%#04i999" would scan between 1230001999 to 1230999999" """)
+	group6.add_option('',   '--ext-range-enabledefaults', dest="ExtDefaults", action="store_true", default=False, help="""Scan for default / typical extensions such as 1000,2000,3000 ... 1100, etc. This option is off by default. Use --enabledefaults to enable this functionality""")
  
 	parser.add_option_group(group4)
 	(options, args) = parser.parse_args()
@@ -121,7 +126,7 @@ if __name__ == '__main__':
 		except IOError:
 			print "Error: File does not appear to exist"
 			return False
-	# Align options: to, URI, domain, registrar_ip, username
+	# Align options: to, URI, domain, registrar_ip, username, host, port
 	if not options.to and not options.registrar_ip: 
 		print 'must supply --to option with the target SIP address'
 		sys.exit(-1)
@@ -131,22 +136,29 @@ if __name__ == '__main__':
 				options.registrar_ip = options.registrar_ip if options.registrar_ip else options.domain
 				options.to = rfc2396.Address(str('<sip:'+options.username+'@'+options.registrar_ip+'>'))
 				options.uri = options.to.uri.dup()
+				options.to.uri.port = options.uri.port = options.port
 			else:
 				options.uri = rfc2396.URI(options.uri) if options.uri else rfc2396.URI(str('sip:'+options.username+'@'+options.registrar_ip))
 				options.to = rfc2396.Address(str(options.uri))
 				options.registrar_ip = options.registrar_ip if options.registrar_ip else options.to.uri.host
+				options.to.uri.port = options.uri.port = options.port
 		else:
 			options.to = rfc2396.Address(options.to)
 			options.uri = rfc2396.URI(options.uri) if options.uri else options.to.uri.dup()
 			options.registrar_ip = options.registrar_ip if options.registrar_ip else options.to.uri.host
+			options.port = options.to.uri.port if options.to.uri.port else options.port
+			options.to.uri.port = options.uri.port = options.port
+			
 	if not options.fromAddr:
-		options.username = options.username if options.username else (options.reg_username if options.reg_username else default_login)
+		options.username = options.username if options.username else (options.reg_username if options.reg_username else options.to.uri.user)
 		options.reg_username = options.reg_username if options.reg_username else options.username
 		options.fromAddr = rfc2396.Address(str('<sip:'+options.username+'@'+options.registrar_ip+'>'))
+		options.fromAddr.uri.port = options.port
 	else:
 		options.fromAddr = rfc2396.Address(options.fromAddr)
 		options.username = options.username if options.username else options.fromAddr.displayable
 		options.reg_username = options.reg_username if options.reg_username else options.fromAddr.displayable
+		options.fromAddr.uri.port = options.port
 	# Validate Flooding options
 	if options.flood_msg_file and not FileCheck(options.flood_msg_file): sys.exit(-1)
 		
@@ -443,6 +455,7 @@ if __name__ == '__main__':
 			app = module_flooder.FloodingApp(options)
         if options.sipot_mode == 'fuzzing':
 			import module_fuzzer
+			app = module_fuzzer.FuzzingApp(options)
         if options.sipot_mode == 'spoofing':
 			import module_spoofer
 			app = module_spoofer.SpoofingApp(options)
