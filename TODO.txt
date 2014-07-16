@@ -1,0 +1,10 @@
+// APP GRAL =====================================
+* Mover todas las dependencias a la carpeta /lib
+
+// FLOODER ======================================
+
+// FUZZER =======================================
+* Agregar opción para el modo de fuzzing. Ahora sólo s_get("INVITE_COMMON").
+* Agregar opción (tipo -l de voiper) para mostrar los modos de fuzzing.
+
+// SPOOFER ======================================
