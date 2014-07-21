@@ -99,9 +99,11 @@ if __name__ == '__main__':
 	group4.add_option('',   '--flood-msg-file', dest='flood_msg_file', default=None, help='Provide a message from file to flood.')
     
 	group5 = OptionGroup(parser, 'Fuzzing Mode', 'use this options to set fuzzing parameters')
-	group5.add_option('-l', action='store_true', dest='list_fuzzers', help='Display a list of available fuzzers or display help on a specific fuzzer if the -f option is also provided')
+	group5.add_option('-l', '--fuzz-fuzzer-list', default=False, action='store_true', dest='list_fuzzers', help='Display a list of available fuzzers or display help on a specific fuzzer if the -f option is also provided')
 	group5.add_option('',   '--fuzz-fuzzer', dest='fuzzer', default='InviteCommonFuzzer', help='Set fuzzer. Default is InviteCommonFuzzer. Use -l to see a list of all available fuzzers')
-	
+	group5.add_option('',   '--fuzz-crash', default=False, action='store_true', dest='crash_detect', help='Enables crash detection')
+	group5.add_option('',   '--fuzz-crash-method', dest='crash_method', default='OPTIONS', help='Set crash method. By default uses OPTIONS message and stores response.')
+
 	group6 = OptionGroup(parser, 'Generate Extention options', 'Extensions options for flooding. Changes the originator extention in each message.')
 	group6.add_option('',   '--no-modify-ext',dest='modify_extentions', default=True, action='store_false', help='If not specified, extentions will be modified in each message flooded. To generate extentions options --ext-dictionary &--ext-range  will be used.')
 	group6.add_option('',   "--ext-dictionary", dest="ExtDictionary", type="string",help="Specify a dictionary file with possible extension names")

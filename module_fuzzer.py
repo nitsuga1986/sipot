@@ -11,14 +11,19 @@ import sip_block
 
 class fuzzerUser(User):
 	'''The User object provides a layer between the application and the SIP stack.'''
-	FUZZING, FUZZING_COMPETED = 'User fuzzing', 'Fuzzing completed!'
+	FUZZING, FUZZING_COMPETED, SETTING_CRASH_DETECT, CRASH_SET, CRASH_ERROR = 'User fuzzing', 'Fuzzing completed!', 'Setting crash detect', 'Crash set', 'Crash error'
 	
 	def __init__(self, app):
 		User.__init__(self,app)
         #Fuzzer options
 		self._fuzzerGen = None
+		self._setCrashGen = None
 		self.fuzzer = app.options.fuzzer
-	
+		self.crash_detect = app.options.crash_detect
+		self.crash_method  = app.options.crash_method
+		self.crash_response = None
+		self.crash_state = None
+		
 	def stop(self):
 		if self._listenerGen:
 			self._listenerGen.close()
@@ -34,6 +39,14 @@ class fuzzerUser(User):
 		if not self._fuzzerGen:
 			self._fuzzerGen  = self._fuzzing()
 			multitask.add(self._fuzzerGen)
+		return self
+		
+	def add_setCrashDetectGen(self):
+		self.app.status.append('Crash detection Initiated')
+		self.state = self.SETTING_CRASH_DETECT
+		if not self._setCrashGen:
+			self._setCrashGen  = self._setCrashDetect()
+			multitask.add(self._setCrashGen)
 		return self
 		
 	def _listener(self):
@@ -53,8 +66,8 @@ class fuzzerUser(User):
 						m = rfc3261.Message()
 						try:
 							pass
-							#m._parse(data)
-							#self.app.fuzzResponse[str(m.CSeq)] = str(m.response)+' '+str(m.responsetext)
+							m._parse(data)
+							self.app.fuzzResponse[str(m.CSeq)] = str(m.response)+' '+str(m.responsetext)
 						except ValueError, E: # TODO: send 400 response to non-ACK request
 							logger.debug('Error in received message:', E)
 							logger.debug(traceback.print_exc())
@@ -62,10 +75,33 @@ class fuzzerUser(User):
 		except GeneratorExit: pass
 		except: print 'User._listener exception', (sys and sys.exc_info() or None); traceback.print_exc(); raise
 		logger.debug('terminating User._listener()')
+
+	def _setCrashDetect(self):
+		try:
+			request_porbe = self._ua.createRequest(self.crash_method)
+			r = []
+			for i in range(3):
+				self._ua.sendRequest(request_porbe)
+				WaitingResponse = True
+				while WaitingResponse:
+					response = (yield self._ua.queue.get())
+					if response:
+						r.append(response)
+						WaitingResponse = False
+						if response.CSeq.method == self.crash_method:
+							print "RECEIVED!!!"
+			if (str(r[0].Cseq) == str(r[1].Cseq) == str(r[2].Cseq))and(str(r[0].Via) == str(r[1].Via) == str(r[2].Via))and(str(r[0].From) == str(r[1].From) == str(r[2].From)):
+				self.crash_response = response
+			else:
+				self.crash_state = self.CRASH_ERROR
+			sys.exit(0)
+		except GeneratorExit:
+			raise StopIteration(('failed', 'Generator closed'))
 		
 	def _fuzzing(self):
 		# Msg to Fumzz generator ---------
 		fuzzers = {'InviteCommonFuzzer': 'INVITE_COMMON', 'InviteStructureFuzzer': 'INVITE_STRUCTURE', 'InviteRequestLineFuzzer': 'INVITE_REQUEST_LINE','InviteOtherFuzzer': 'INVITE_OTHER', 'CANCELFuzzer': 'CANCEL', 'REGISTERFuzzer': 'REGISTER','SUBSCRIBEFuzzer': 'SUBSCRIBE', 'NOTIFYFuzzer': 'NOTIFY', 'ACKFuzzer': 'ACK'}
+
 		def _createMutableMessage():
 			# Msg to Fuzz generator ---------
 			if not self.fuzzer == 'All':
@@ -106,7 +142,8 @@ class fuzzerUser(User):
 						mutable_msg.mutate()
 						m = replaceDefaults(mutable_msg.render())
 						yield (m)
-				
+		
+		if not self.crash_detect: self._listenerGen.close()
 		# Dest Address
 		addr = self.remoteTarget.uri
 		if addr and isinstance(addr, rfc2396.URI):
@@ -186,13 +223,19 @@ class FuzzingApp(App):
 				print self.status.pop(0)
 			# If not register needed or already registered => fuzz
 			if not self.options.register or (self.options.register and self.user.reg_state==self.user.REGISTERED):
-				self.user.add_fuzzerGen()
 				while True:
-					yield multitask.sleep(1)
-					if not self.user.state == self.user.FUZZING:
-						self.printFuzzResults()
-						self.stop()
-						raise StopIteration()
+					# If not crash_detect => fuzz,  else => set setCrashDetect
+					if not self.options.crash_detect or (self.options.crash_detect and self.user.crash_state==self.user.CRASH_SET):
+						self.user.add_fuzzerGen()
+						while True:
+							yield multitask.sleep(1)
+							if not self.user.state == self.user.FUZZING:
+								self.printFuzzResults()
+								self.stop()
+								raise StopIteration()
+							yield
+					else:
+						self.user.add_setCrashDetectGen()			
 					yield
 			# If register needed and could not register = > stop app
 			elif not (self.user.reg_result=='success' or self.user.reg_result==None):
