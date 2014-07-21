@@ -65,10 +65,13 @@ class fuzzerUser(User):
 		
 	def _fuzzing(self):
 		# Msg to Fumzz generator ---------
+		fuzzers = {'InviteCommonFuzzer': 'INVITE_COMMON', 'InviteStructureFuzzer': 'INVITE_STRUCTURE', 'InviteRequestLineFuzzer': 'INVITE_REQUEST_LINE','InviteOtherFuzzer': 'INVITE_OTHER', 'CANCELFuzzer': 'CANCEL', 'REGISTERFuzzer': 'REGISTER','SUBSCRIBEFuzzer': 'SUBSCRIBE', 'NOTIFYFuzzer': 'NOTIFY', 'ACKFuzzer': 'ACK'}
 		def _createMutableMessage():
 			# Msg to Fuzz generator ---------
-			fuzzers = {'InviteCommonFuzzer': 'INVITE_COMMON', 'InviteStructureFuzzer': 'INVITE_STRUCTURE', 'InviteRequestLineFuzzer': 'INVITE_REQUEST_LINE','InviteOtherFuzzer': 'INVITE_OTHER', 'DumbCANCELFuzzer': 'CANCEL', 'DumbREGISTERFuzzer': 'REGISTER','SUBSCRIBEFuzzer': 'SUBSCRIBE', 'NOTIFYFuzzer': 'NOTIFY', 'ACKFuzzer': 'ACK'}
-			mutable_msg = s_get(fuzzers.get(self.fuzzer))
+			if not self.fuzzer == 'All':
+				mutable_msg = s_get(fuzzers.get(self.fuzzer))
+			else:
+				mutable_msg = s_get(fuzzers.get('INVITE_COMMON'))
 			return mutable_msg
 			
 		def _createFuzzerMsgGen(mutable_msg):
@@ -91,10 +94,18 @@ class fuzzerUser(User):
 				rendered_msg = rendered_msg.replace('LOCAL_IP', self.localParty.uri.host)
 				return rendered_msg
 				
-			for i in range(mutable_msg.num_mutations()):
-				mutable_msg.mutate()
-				m = replaceDefaults(mutable_msg.render())
-				yield (m)
+			if not self.fuzzer == 'All':
+				for i in range(mutable_msg.num_mutations()):
+					mutable_msg.mutate()
+					m = replaceDefaults(mutable_msg.render())
+					yield (m)
+			else:
+				for item in fuzzers:
+					mutable_msg = s_get(fuzzers.get(item))
+					for i in range(mutable_msg.num_mutations()):
+						mutable_msg.mutate()
+						m = replaceDefaults(mutable_msg.render())
+						yield (m)
 				
 		# Dest Address
 		addr = self.remoteTarget.uri
@@ -102,9 +113,15 @@ class fuzzerUser(User):
 			if not addr.host: raise ValueError, 'No host in destination uri'
 			addr = (addr.host, addr.port or self.transport.type == 'tls' and self.transport.secure and 5061 or 5060)
 		# Msg generator
+		if not self.fuzzer == 'All':
+			mutations = mutable_msg.num_mutations()
+		else:
+			mutations = 0
+			for item in fuzzers:
+				mutations += s_get(fuzzers.get(item)).num_mutations()
 		mutable_msg = _createMutableMessage()
 		Fuzz_Generator = _createFuzzerMsgGen(mutable_msg)
-		print "Fuzzing %s messages to %s" % (mutable_msg.num_mutations(), addr) # TODO!!
+		print "Fuzzing %s messages to %s" % (mutations, addr) # TODO!!
 		try:
 			if self.sock:
 				if self.sock.type == socket.SOCK_STREAM:

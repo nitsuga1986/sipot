@@ -52,6 +52,10 @@ if __name__ == '__main__':
 	usage += "Fuzzing mode:\r\n"
 	usage += "\t *** Fuzzes the headers commonly found in a SIP INVITE request to 192.168.56.77: ***\r\n"
 	usage += "\t python %prog --sipot-mode fuzzing --to sip:109@192.168.56.77:5060 \r\n"
+	usage += "\t *** Fuzzes the headers commonly found in a SIP REGISTER request to 192.168.56.77: ***\r\n"
+	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer REGISTERFuzzer --to sip:109@192.168.56.77:5060 \r\n"
+	usage += "\t *** Uses all available fuzzers to 192.168.56.77: ***\r\n"
+	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer All --to sip:109@192.168.56.77:5060 \r\n"
 	usage += "Spoofing mode:\r\n"
 	usage += "\r\n"
 	
@@ -127,11 +131,13 @@ if __name__ == '__main__':
 	> InviteStructureFuzzer: Fuzzes the structure of a SIP request by repeating blocks, fuzzing delimiters and generally altering how a SIP request is structured.
 	> InviteRequestLineFuzzer: Extensively tests the first line of an INVITE request by including all valid parts specified in SIP RFC 3375.
 	> InviteOtherFuzzer: Tests all other headers specified as part of an INVITE besides those found in the InviteCommonFuzzer. Many of these are seemingly unparsed and ignored by a lot of devices.
-	> DumbCANCELFuzzer: A dumb CANCEL request fuzzer with no transaction state awareness.
-	> DumbREGISTERFuzzer: A dumb REGISTER request fuzzer with no transaction state awareness.
+	> CANCELFuzzer: A fuzzer for the CANCEL SIP verb.
+	> REGISTERFuzzer: A fuzzer for the REGISTER SIP verb.
 	> SUBSCRIBEFuzzer: A fuzzer for the SUBSCRIBE SIP verb.
 	> NOTIFYFuzzer: A fuzzer for the NOTIFY SIP verb.
 	> ACKFuzzer: A fuzzer for the ACK SIP verb that first attempts to manipulate the target device into a state where it would expect an ACK.
+		
+	> All: Uses all the fuzzers.
 		"""
 		print list_fuzzers
 		sys.exit(-1)

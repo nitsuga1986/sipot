@@ -4,7 +4,8 @@
 // FLOODER ======================================
 
 // FUZZER =======================================
-* Agregar opción para el modo de fuzzing. Ahora sólo s_get("INVITE_COMMON").
-* Agregar opción (tipo -l de voiper) para mostrar los modos de fuzzing.
+XXXXXXXXXX Agregar opción para el modo de fuzzing. Ahora sólo s_get("INVITE_COMMON").
+XXXXXXXXXX Agregar opción (tipo -l de voiper) para mostrar los modos de fuzzing.
+* Crash detection
 
 // SPOOFER ======================================
