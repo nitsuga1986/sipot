@@ -110,7 +110,7 @@ Registrar una extensión SIP:
 La presente herramienta consta de (3) módulos principales, con sus diferentes opciones, para explotar tres de los ataques más comunes realizados a servidores SIP:
 
 ### Flooding ###
-_**Estado:** En desarrollo._
+_**Estado:** Completo (en verificación)._
 
 #### Descripción ####
 
@@ -146,7 +146,7 @@ Flood 500 Msg to 192.168.56.77 changing extentions with dictionary:
 
 
 ### Fuzzing ###
-_**Estado:** No desarrollado aún._
+_**Estado:** En desarrollo._
 
 ### Spoofing ###
 _**Estado:** No desarrollado aún._
