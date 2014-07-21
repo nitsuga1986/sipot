@@ -17,9 +17,7 @@ class fuzzerUser(User):
 		User.__init__(self,app)
         #Fuzzer options
 		self._fuzzerGen = None
-		self.fuzz_method = app.options.fuzz_method
-		self.fuzz_dialog = app.options.fuzz_dialog
-		self.fuzz_msg_file = app.options.fuzz_msg_file
+		self.fuzzer = app.options.fuzzer
 	
 	def stop(self):
 		if self._listenerGen:
@@ -54,11 +52,12 @@ class fuzzerUser(User):
 					else:
 						m = rfc3261.Message()
 						try:
-							m._parse(data)
-							self.app.fuzzResponse[str(m.CSeq)] = str(m.response)+' '+str(m.responsetext)
+							pass
+							#m._parse(data)
+							#self.app.fuzzResponse[str(m.CSeq)] = str(m.response)+' '+str(m.responsetext)
 						except ValueError, E: # TODO: send 400 response to non-ACK request
-							if _debug: print 'Error in received message:', E
-							if _debug: traceback.print_exc()
+							logger.debug('Error in received message:', E)
+							logger.debug(traceback.print_exc())
 				except multitask.Timeout: pass
 		except GeneratorExit: pass
 		except: print 'User._listener exception', (sys and sys.exc_info() or None); traceback.print_exc(); raise
@@ -68,24 +67,19 @@ class fuzzerUser(User):
 		# Msg to Fumzz generator ---------
 		def _createMutableMessage():
 			# Msg to Fuzz generator ---------
-			mutable_msg = s_get("INVITE_COMMON")
-			print mutable_msg.num_mutations()
+			fuzzers = {'InviteCommonFuzzer': 'INVITE_COMMON', 'InviteStructureFuzzer': 'INVITE_STRUCTURE', 'InviteRequestLineFuzzer': 'INVITE_REQUEST_LINE','InviteOtherFuzzer': 'INVITE_OTHER', 'DumbCANCELFuzzer': 'CANCEL', 'DumbREGISTERFuzzer': 'REGISTER','SUBSCRIBEFuzzer': 'SUBSCRIBE', 'NOTIFYFuzzer': 'NOTIFY', 'ACKFuzzer': 'ACK'}
+			mutable_msg = s_get(fuzzers.get(self.fuzzer))
 			return mutable_msg
 			
 		def _createFuzzerMsgGen(mutable_msg):
 			def replaceDefaults(rendered_msg):
 				from random import Random
 				import string
-				print "HERE"
-				print self
-				print self.localParty
-				print self.localParty.uri.host
 				# branch
 				self.curr_invite_branch = ''.join(Random().sample(string.ascii_lowercase+string.digits, 32))
 				rendered_msg = rendered_msg.replace('somebranchvalue', self.curr_invite_branch)
 				rendered_msg = rendered_msg.replace('somefromtagvalue', self.curr_invite_branch)
 				rendered_msg = rendered_msg.replace('somecallidvalue', self.curr_invite_branch)
-				print rendered_msg
 				# This stuff is new in this function and should be moved elsewhere
 				# Works fine here for now though
 				rendered_msg = rendered_msg.replace('TARGET_USER', self.remoteParty.uri.user)
@@ -97,7 +91,7 @@ class fuzzerUser(User):
 				rendered_msg = rendered_msg.replace('LOCAL_IP', self.localParty.uri.host)
 				return rendered_msg
 				
-			for i in range(1000):
+			for i in range(mutable_msg.num_mutations()):
 				mutable_msg.mutate()
 				m = replaceDefaults(mutable_msg.render())
 				yield (m)
@@ -110,31 +104,17 @@ class fuzzerUser(User):
 		# Msg generator
 		mutable_msg = _createMutableMessage()
 		Fuzz_Generator = _createFuzzerMsgGen(mutable_msg)
-		print "Fuzzing %s messages to %s" % (addr, addr) # TODO!!
+		print "Fuzzing %s messages to %s" % (mutable_msg.num_mutations(), addr) # TODO!!
 		try:
 			if self.sock:
 				if self.sock.type == socket.SOCK_STREAM:
-					try: 
-						remote = self.sock.getpeername()
-						if remote != addr:
-							logger.debug('connected to wrong addr', remote, 'but sending to', addr)
-					except socket.error: # not connected, try connecting
-						try:
-							self.sock.connect(addr)
-						except socket.error:
-							logger.debug('failed to connect to', addr)
-					try:
-						# Sender TCP
-						pass
-						# Sender TCP
-						yield
-						raise StopIteration()
-					except socket.error:
-						logger.debug('socket error in send')
+					pass
 				elif self.sock.type == socket.SOCK_DGRAM:
 					while True:
 						try:
 							data = str(Fuzz_Generator.next())
+							if len(data) > 9216:
+								data = data[:9216]
 							try:
 								self.sock.sendto(data, addr)
 							except socket.error:

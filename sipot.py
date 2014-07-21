@@ -50,6 +50,8 @@ if __name__ == '__main__':
 	usage += "\t *** Flood 500 Msg to 192.168.56.77 changing extentions with dictionary: ***\r\n"
 	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary example_sipot_ext_dict.txt \r\n"
 	usage += "Fuzzing mode:\r\n"
+	usage += "\t *** Fuzzes the headers commonly found in a SIP INVITE request to 192.168.56.77: ***\r\n"
+	usage += "\t python %prog --sipot-mode fuzzing --to sip:109@192.168.56.77:5060 \r\n"
 	usage += "Spoofing mode:\r\n"
 	usage += "\r\n"
 	
@@ -93,10 +95,9 @@ if __name__ == '__main__':
 	group4.add_option('',   '--flood-msg-file', dest='flood_msg_file', default=None, help='Provide a message from file to flood.')
     
 	group5 = OptionGroup(parser, 'Fuzzing Mode', 'use this options to set fuzzing parameters')
-	group5.add_option('',   '--fuzz-dialog',dest='fuzz_dialog', default=False, action='store_true', help='By default fuzz only method defined (REGISTER by default). If selected will fuzz method inside a dialog.')
-	group5.add_option('',   '--fuzz-method', dest='fuzz_method', default='REGISTER', help='Set the method to flood. Default is REGISTER.')
-	group5.add_option('',   '--fuzz-msg-file', dest='fuzz_msg_file', default=None, help='Provide a message from file to fuzz.')
-
+	group5.add_option('-l', action='store_true', dest='list_fuzzers', help='Display a list of available fuzzers or display help on a specific fuzzer if the -f option is also provided')
+	group5.add_option('',   '--fuzz-fuzzer', dest='fuzzer', default='InviteCommonFuzzer', help='Set fuzzer. Default is InviteCommonFuzzer. Use -l to see a list of all available fuzzers')
+	
 	group6 = OptionGroup(parser, 'Generate Extention options', 'Extensions options for flooding. Changes the originator extention in each message.')
 	group6.add_option('',   '--no-modify-ext',dest='modify_extentions', default=True, action='store_false', help='If not specified, extentions will be modified in each message flooded. To generate extentions options --ext-dictionary &--ext-range  will be used.')
 	group6.add_option('',   "--ext-dictionary", dest="ExtDictionary", type="string",help="Specify a dictionary file with possible extension names")
@@ -118,6 +119,22 @@ if __name__ == '__main__':
 	if options.verbose_all:
 		if hasattr(rfc3261, 'logger'): rfc3261.logger.setLevel(logging.DEBUG)
 		else: rfc3261._debug = True
+		
+	if options.list_fuzzers:
+		list_fuzzers = """
+	> InviteCommonFuzzer (default): Fuzzes the headers commonly found and most likely to be processed in a SIP INVITE request
+
+	> InviteStructureFuzzer: Fuzzes the structure of a SIP request by repeating blocks, fuzzing delimiters and generally altering how a SIP request is structured.
+	> InviteRequestLineFuzzer: Extensively tests the first line of an INVITE request by including all valid parts specified in SIP RFC 3375.
+	> InviteOtherFuzzer: Tests all other headers specified as part of an INVITE besides those found in the InviteCommonFuzzer. Many of these are seemingly unparsed and ignored by a lot of devices.
+	> DumbCANCELFuzzer: A dumb CANCEL request fuzzer with no transaction state awareness.
+	> DumbREGISTERFuzzer: A dumb REGISTER request fuzzer with no transaction state awareness.
+	> SUBSCRIBEFuzzer: A fuzzer for the SUBSCRIBE SIP verb.
+	> NOTIFYFuzzer: A fuzzer for the NOTIFY SIP verb.
+	> ACKFuzzer: A fuzzer for the ACK SIP verb that first attempts to manipulate the target device into a state where it would expect an ACK.
+		"""
+		print list_fuzzers
+		sys.exit(-1)
 	# Verify if external file exists
 	def FileCheck(fn):
 		try:
