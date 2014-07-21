@@ -25,6 +25,13 @@ Para poder utilizar esta aplicación se deberá tener instaladas las siguientes 
 *   **Licencia:** MIT License.
 *   **Uso:** Para generar tareas simultaneas.
 
+### Sulley ###
+> "_Pure Python fully automated and unattended fuzzing framework_"
+
+*   **Link:** [Sulley](https://code.google.com/p/sulley/).
+*   **Licencia:** GNU GPL v2.
+*   **Uso:** Para generar los mensajes y mutarlos en el modo fuzzing.
+
 
 ## Descripción general: ##
 La presente herramienta propone el uso de la librerìa de 39Peers desarrollada por Kundan Singh para el desarrollo de una herramienta interactiva que permita auditar sistemas VoIP basados en SIP.
