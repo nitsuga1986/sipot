@@ -103,7 +103,9 @@ if __name__ == '__main__':
 	group5.add_option('',   '--fuzz-fuzzer', dest='fuzzer', default='InviteCommonFuzzer', help='Set fuzzer. Default is InviteCommonFuzzer. Use -l to see a list of all available fuzzers')
 	group5.add_option('',   '--fuzz-crash', default=False, action='store_true', dest='crash_detect', help='Enables crash detection')
 	group5.add_option('',   '--fuzz-crash-method', dest='crash_method', default='OPTIONS', help='Set crash method. By default uses OPTIONS message and stores response.')
-
+	group5.add_option('',   '--fuzz-max', dest='fuzz_max_msgs', default=99999, type="int", help='Sets the maximum number of messages to be sent by fuzzing mode. Default is max available in fuzzer.')
+	group5.add_option('',   '--fuzz-to-file', dest='file_name', default=None, help='Print the output to a file with the given name.')
+	
 	group6 = OptionGroup(parser, 'Generate Extention options', 'Extensions options for flooding. Changes the originator extention in each message.')
 	group6.add_option('',   '--no-modify-ext',dest='modify_extentions', default=True, action='store_false', help='If not specified, extentions will be modified in each message flooded. To generate extentions options --ext-dictionary &--ext-range  will be used.')
 	group6.add_option('',   "--ext-dictionary", dest="ExtDictionary", type="string",help="Specify a dictionary file with possible extension names")
@@ -128,18 +130,18 @@ if __name__ == '__main__':
 		
 	if options.list_fuzzers:
 		list_fuzzers = """
-	> InviteCommonFuzzer (default): Fuzzes the headers commonly found and most likely to be processed in a SIP INVITE request
+	> InviteCommonFuzzer[6775] (default): Fuzzes the headers commonly found and most likely to be processed in a SIP INVITE request
 
-	> InviteStructureFuzzer: Fuzzes the structure of a SIP request by repeating blocks, fuzzing delimiters and generally altering how a SIP request is structured.
-	> InviteRequestLineFuzzer: Extensively tests the first line of an INVITE request by including all valid parts specified in SIP RFC 3375.
-	> InviteOtherFuzzer: Tests all other headers specified as part of an INVITE besides those found in the InviteCommonFuzzer. Many of these are seemingly unparsed and ignored by a lot of devices.
-	> CANCELFuzzer: A fuzzer for the CANCEL SIP verb.
-	> REGISTERFuzzer: A fuzzer for the REGISTER SIP verb.
-	> SUBSCRIBEFuzzer: A fuzzer for the SUBSCRIBE SIP verb.
-	> NOTIFYFuzzer: A fuzzer for the NOTIFY SIP verb.
-	> ACKFuzzer: A fuzzer for the ACK SIP verb that first attempts to manipulate the target device into a state where it would expect an ACK.
+	> InviteStructureFuzzer[943]: Fuzzes the structure of a SIP request by repeating blocks, fuzzing delimiters and generally altering how a SIP request is structured.
+	> InviteRequestLineFuzzer[1239]: Extensively tests the first line of an INVITE request by including all valid parts specified in SIP RFC 3375.
+	> InviteOtherFuzzer[10497]: Tests all other headers specified as part of an INVITE besides those found in the InviteCommonFuzzer. Many of these are seemingly unparsed and ignored by a lot of devices.
+	> CANCELFuzzer[3106]: A fuzzer for the CANCEL SIP verb.
+	> REGISTERFuzzer[6283]: A fuzzer for the REGISTER SIP verb.
+	> SUBSCRIBEFuzzer[4354]: A fuzzer for the SUBSCRIBE SIP verb.
+	> NOTIFYFuzzer[5984]: A fuzzer for the NOTIFY SIP verb.
+	> ACKFuzzer[3106]: A fuzzer for the ACK SIP verb that first attempts to manipulate the target device into a state where it would expect an ACK.
 		
-	> All: Uses all the fuzzers.
+	> All[42287]: Uses all the fuzzers.
 		"""
 		print list_fuzzers
 		sys.exit(-1)
@@ -451,7 +453,17 @@ class App(object):
 	def createUser(self):
 		self.user = User(self).createClient()
 		return self
-		
+
+	def exit_gracefully(self, signum, frame):
+		import signal
+		try:
+			if raw_input("\nReally quit? (y/n)> ").lower().startswith('y'):
+				self.printResults()
+				self.stop()
+		except KeyboardInterrupt:
+			print("Ok ok, quitting")
+			sys.exit(1)
+			
 	def mainController(self):
 		logger.info("ntsga: start main default controller")
 		while True:
@@ -462,6 +474,10 @@ class App(object):
 				raise StopIteration()
 			yield
 
+	def printResults(self):
+		print "No results... =("
+		return self
+		
 	def stop(self):
 		self.RUNNING = False
 		return self
@@ -472,7 +488,8 @@ class App(object):
 
 
 #-------------------- START APPS---------------------------------
-if __name__ == '__main__': 
+if __name__ == '__main__':
+    import signal
     try:
         print "------------------------------------------------------------------------------------------------------------"
         if options.sipot_mode == 'flooding':
@@ -485,6 +502,7 @@ if __name__ == '__main__':
 			import module_spoofer
 			app = module_spoofer.SpoofingApp(options)
         if not 'app' in globals(): app = App(options)
+        signal.signal(signal.SIGINT, app.exit_gracefully)
         app.start()
     except KeyboardInterrupt:
         print '' # to print a new line after ^C

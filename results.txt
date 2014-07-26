@@ -1,0 +1,4 @@
+| Index | Fuzz response      | Probe response |
+-----------------------------------------------
+| 1     | SIP/2.0 100 Trying | SIP/2.0 200 OK |
+| 2     | SIP/2.0 100 Trying | SIP/2.0 200 OK |
