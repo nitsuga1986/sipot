@@ -1,7 +1,11 @@
 # Fuzzing App
+
 import os, sys, traceback, socket, multitask
 from sipot import App, User, logger, bcolors
-from std import rfc3261, rfc2396
+
+# 39peers
+sys.path.append(''.join([os.getcwd(), '/lib/39peers/std']))
+import rfc3261, rfc2396
 # Sulley
 sys.path.append(''.join([os.getcwd(), '/lib/sulley']))
 from sulley import *
@@ -297,7 +301,6 @@ class FuzzingApp(App):
 			else:
 				print indent([labels]+rows,hasHeader=True, prefix='| ', postfix=' |',wrapfunc=lambda x: wrap_onspace(x,width))
 			
-
 	def mainController(self):
 		logger.info("ntsga: start fuzzing controller")
 		while True:

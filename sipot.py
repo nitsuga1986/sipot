@@ -24,8 +24,10 @@ __desc__ = "SIP Open Tester"
 import os, sys, traceback, socket, multitask, random, logging, signal
 
 try:
-	from std import rfc3261, rfc2396, rfc3550, rfc4566, kutil, rfc3489bis
-	from external import log
+	sys.path.append(''.join([os.getcwd(), '/lib/39peers/std']))
+	import rfc3261, rfc2396, rfc3550, rfc4566, kutil, rfc3489bis
+	sys.path.append(''.join([os.getcwd(), '/lib/39peers/external']))
+	import log
 	
 except ImportError: print 'Please install p2p-sip and include p2p-sip/src and p2p-sip/src/external in your PYTHONPATH'; traceback.print_exc(); sys.exit(1)
 logger = logging.getLogger('app') # debug(), info(), warning(), error() and critical()
@@ -197,7 +199,8 @@ class bcolors:
 	WARNING = '\033[93m'
 	FAIL = '\033[91m'
 	ENDC = '\033[0m'
-
+	
+# Base User class
 class User(object):
 	'''The User object provides a layer between the application and the SIP stack.'''
 	REGISTERED, UDP, TCP, TLS = 'Registered user','udp', 'tcp', 'tls' # transport values
@@ -429,7 +432,7 @@ class User(object):
 			except AttributeError: pass
 		multitask.add(_send(self, data, addr))
 
-# APP class
+# Base App class
 class App(object):
 	RUNNING = 'Runnning'
 	def __init__(self, options):
@@ -485,7 +488,6 @@ class App(object):
 	def close(self): 
 		if self.user:
 			self.user.stop()
-
 
 #-------------------- START APPS---------------------------------
 if __name__ == '__main__':
