@@ -3,10 +3,11 @@ import os, sys, traceback, socket, multitask
 from sipot import App, User, logger, bcolors
 from std import rfc3261, rfc2396
 # Sulley
-sys.path.append(''.join([os.getcwd(), '/sulley']))
+sys.path.append(''.join([os.getcwd(), '/lib/sulley']))
 from sulley import *
-sys.path.append(''.join([os.getcwd(), '/sulley/requests']))
+sys.path.append(''.join([os.getcwd(), '/lib/sulley/requests']))
 import sip_block
+sys.path.append(''.join([os.getcwd(), '/lib/']))
 
 
 class fuzzerUser(User):

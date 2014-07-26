@@ -21,7 +21,7 @@ __version__ = '0.1'
 __prog__ = 'sipot'
 __desc__ = "SIP Open Tester"
 
-import os, sys, traceback, socket, multitask, random, logging
+import os, sys, traceback, socket, multitask, random, logging, signal
 
 try:
 	from std import rfc3261, rfc2396, rfc3550, rfc4566, kutil, rfc3489bis
@@ -489,7 +489,6 @@ class App(object):
 
 #-------------------- START APPS---------------------------------
 if __name__ == '__main__':
-    import signal
     try:
         print "------------------------------------------------------------------------------------------------------------"
         if options.sipot_mode == 'flooding':
