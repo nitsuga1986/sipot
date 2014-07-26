@@ -1,11 +1,13 @@
 # Flooding App
 
-import socket, multitask, random
+import sys, os, socket, multitask, random
 from sipot import App, User, logger
 
 # 39peers
 sys.path.append(''.join([os.getcwd(), '/lib/39peers/std']))
 import rfc3261, rfc2396
+# Others: [multitask, helper_functions]
+sys.path.append(''.join([os.getcwd(), '/lib/']))
 
 class flooderUser(User):
 	'''The User object provides a layer between the application and the SIP stack.'''

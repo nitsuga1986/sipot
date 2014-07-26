@@ -51,6 +51,7 @@ if __name__ == '__main__':
 	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --flood-msg-file example_sipot_flood.txt \r\n"
 	usage += "\t *** Flood 500 Msg to 192.168.56.77 changing extentions with dictionary: ***\r\n"
 	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary example_sipot_ext_dict.txt \r\n"
+	usage += "\r\n"
 	usage += "Fuzzing mode:\r\n"
 	usage += "\t *** Fuzzes the headers commonly found in a SIP INVITE request to 192.168.56.77: ***\r\n"
 	usage += "\t python %prog --sipot-mode fuzzing --to sip:109@192.168.56.77:5060 \r\n"
@@ -58,6 +59,9 @@ if __name__ == '__main__':
 	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer REGISTERFuzzer --to sip:109@192.168.56.77:5060 \r\n"
 	usage += "\t *** Uses all available fuzzers to 192.168.56.77: ***\r\n"
 	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer All --to sip:109@192.168.56.77:5060 \r\n"
+	usage += "\t *** Print results to a file: ***\r\n"
+	usage += "\t python %prog--sipot-mode fuzzing --fuzz-crash --fuzz-to-file results.txt --to sip:109@192.168.56.77:5060 \r\n"
+	usage += "\r\n"
 	usage += "Spoofing mode:\r\n"
 	usage += "\r\n"
 	

@@ -11,6 +11,7 @@ sys.path.append(''.join([os.getcwd(), '/lib/sulley']))
 from sulley import *
 sys.path.append(''.join([os.getcwd(), '/lib/sulley/requests']))
 import sip_block
+# Others: [multitask, pptable]
 sys.path.append(''.join([os.getcwd(), '/lib/']))
 
 
