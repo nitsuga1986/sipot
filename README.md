@@ -9,7 +9,7 @@ SIPOT: SIP Open Tester
 
 
 ## Dependencias: ##
-Para poder utilizar esta aplicación se deberá tener instaladas las siguientes dependencias y estar vinculadas en PYTHONPATH para su importación.
+Todas las dependencias han sido embebidas dentro del paquete. Pueden encontrarse las librerías utilizadas dentro de la carpeta /lib.
 
 ### 39 Peers ###
 > "_The 39 Peers project aims at implementing an open-source peer-to-peer Internet telephony software using the Session Initiation Protocol (P2P-SIP) in the Python programming language._"
