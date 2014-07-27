@@ -58,9 +58,9 @@ if __name__ == '__main__':
 	usage += "\t *** Fuzzes the headers commonly found in a SIP REGISTER request to 192.168.56.77: ***\r\n"
 	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer REGISTERFuzzer --to sip:109@192.168.56.77:5060 \r\n"
 	usage += "\t *** Uses all available fuzzers to 192.168.56.77: ***\r\n"
-	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer All --to sip:109@192.168.56.77:5060 \r\n"
+	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer --fuzz-max 10 All --to sip:109@192.168.56.77:5060 \r\n"
 	usage += "\t *** Print results to a file: ***\r\n"
-	usage += "\t python %prog--sipot-mode fuzzing --fuzz-crash --fuzz-to-file results.txt --to sip:109@192.168.56.77:5060 \r\n"
+	usage += "\t python %prog --sipot-mode fuzzing --fuzz-crash --fuzz-to-file example_fuzz_results.txt --to sip:109@192.168.56.77:5060 \r\n"
 	usage += "\r\n"
 	usage += "Spoofing mode:\r\n"
 	usage += "\r\n"
@@ -109,6 +109,7 @@ if __name__ == '__main__':
 	group5.add_option('',   '--fuzz-fuzzer', dest='fuzzer', default='InviteCommonFuzzer', help='Set fuzzer. Default is InviteCommonFuzzer. Use -l to see a list of all available fuzzers')
 	group5.add_option('',   '--fuzz-crash', default=False, action='store_true', dest='crash_detect', help='Enables crash detection')
 	group5.add_option('',   '--fuzz-crash-method', dest='crash_method', default='OPTIONS', help='Set crash method. By default uses OPTIONS message and stores response.')
+	group5.add_option('',   '--fuzz-crash-no-stop', default=False, action='store_true', dest='no_stop_at_crash', help='If selected prevents the app to be stoped when a crash is detected.')
 	group5.add_option('',   '--fuzz-max', dest='fuzz_max_msgs', default=99999, type="int", help='Sets the maximum number of messages to be sent by fuzzing mode. Default is max available in fuzzer.')
 	group5.add_option('',   '--fuzz-to-file', dest='file_name', default=None, help='Print the output to a file with the given name.')
 	

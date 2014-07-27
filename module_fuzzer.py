@@ -33,6 +33,7 @@ class fuzzerUser(User):
 		self.crash_detect = app.options.crash_detect
 		self.crash_method  = app.options.crash_method
 		self.fuzz_max_msgs  = app.options.fuzz_max_msgs
+		self.no_stop_at_crash  = app.options.no_stop_at_crash
 		#Fuzzer sets
 		self._fuzzerGen = None
 		self._setCrashGen = None
@@ -70,7 +71,7 @@ class fuzzerUser(User):
 		return self
 		
 	def _fuzzing(self):
-		# Msg to Fumzz generator ---------
+		# Msg to Fuzz generator ---------
 		fuzzers = {'InviteCommonFuzzer': 'INVITE_COMMON', 'InviteStructureFuzzer': 'INVITE_STRUCTURE', 'InviteRequestLineFuzzer': 'INVITE_REQUEST_LINE','InviteOtherFuzzer': 'INVITE_OTHER', 'CANCELFuzzer': 'CANCEL', 'REGISTERFuzzer': 'REGISTER','SUBSCRIBEFuzzer': 'SUBSCRIBE', 'NOTIFYFuzzer': 'NOTIFY', 'ACKFuzzer': 'ACK'}
 
 		def fuzzingCtrl(fuzz_index):
@@ -132,6 +133,7 @@ class fuzzerUser(User):
 							m = replaceDefaults(mutable_msg.render())
 							yield (m)
 		
+		# Stop listener if no crash detection is been used
 		if not self.crash_detect: self._listenerGen.close()
 		# Dest Address
 		addr = self.remoteTarget.uri
@@ -147,7 +149,7 @@ class fuzzerUser(User):
 			for item in fuzzers:
 				self.mutations += s_get(fuzzers.get(item)).num_mutations()
 		Fuzz_Generator = _createFuzzerMsgGen(mutable_msg)
-		print "Fuzzing %s messages to %s" % (self.mutations, addr) # TODO!!
+		print "Fuzzing %s messages to %s" % (self.mutations, addr)
 		try:
 			if self.sock:
 				if self.sock.type == socket.SOCK_STREAM:
@@ -205,7 +207,12 @@ class fuzzerUser(User):
 						except ValueError, E: # TODO: send 400 response to non-ACK request
 							logger.debug('Error in received message:', E)
 							logger.debug(traceback.print_exc())
-				except multitask.Timeout: pass
+				except multitask.Timeout:
+					if self.state == self.FUZZING and self.crash_detect:
+						print (bcolors.FAIL+"Crash detected!"+bcolors.ENDC +" It seems that we found a server crash. If this is a false-positive you can use --fuzz-crash-no-stop option to prevent the app stop at crash detection.")
+						self.app.printResults()
+						self.app.stop()
+					
 		except GeneratorExit: pass
 		except: print 'User._listener exception', (sys and sys.exc_info() or None); traceback.print_exc(); raise
 		logger.debug('terminating User._listener()')
@@ -251,6 +258,14 @@ class fuzzerUser(User):
 							response = (yield self._ua.queue.get())
 							if response:
 								# print '4. Probe responded'
+								if self.no_stop_at_crash: pass
+								else:
+									r[0] = self.crash_response
+									r[1] = response
+									if ((str(r[0].Cseq) == str(r[1].Cseq))and(str(r[0].Via) == str(r[1].Via))and(str(r[0].From) == str(r[1].From))) or str(r[1].response) == '408':
+										print (bcolors.FAIL+"Crash detected!"+bcolors.ENDC +" It seems that we found a server crash. If this is a false-positive you can use --fuzz-crash-no-stop option to prevent the app stop at crash detection.")
+										self.app.printResults()
+										self.app.stop()
 								WaitingResponse = False
 								self.crash_porbe = self.CRASH_PROBE_REC
 								self.crash_fuzz = self.WAIT_FUZZ
