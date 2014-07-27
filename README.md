@@ -7,32 +7,6 @@ SIPOT: SIP Open Tester
 *   **Fuzzer:** Realizar [fuzz testing](http://en.wikipedia.org/wiki/Fuzz_testing) sobre un objetivo.
 *   **Spoofer:** Utlizar técnicas de [spoofing](http://es.wikipedia.org/wiki/Spoofing) sobre un objetivo
 
-
-## Dependencias: ##
-Todas las dependencias han sido embebidas dentro del paquete. Pueden encontrarse las librerías utilizadas dentro de la carpeta /lib.
-
-### 39 Peers ###
-> "_The 39 Peers project aims at implementing an open-source peer-to-peer Internet telephony software using the Session Initiation Protocol (P2P-SIP) in the Python programming language._"
-
-*   **Link:** [39 Peers](https://pypi.python.org/pypi/multitask/) .
-*   **Licencia:** GNU/GPL.
-*   **Uso:** Librería básica del protocolo SIP.
-
-### Multitask 0.2.0 ###
-> "_Cooperative multitasking and asynchronous I/O using generators_"
-
-*   **Link:** [Multitask 0.2.0](https://pypi.python.org/pypi/multitask/).
-*   **Licencia:** MIT License.
-*   **Uso:** Para generar tareas simultaneas.
-
-### Sulley ###
-> "_Pure Python fully automated and unattended fuzzing framework_"
-
-*   **Link:** [Sulley](https://code.google.com/p/sulley/).
-*   **Licencia:** GNU GPL v2.
-*   **Uso:** Para generar los mensajes y mutarlos en el modo fuzzing.
-
-
 ## Descripción general: ##
 La presente herramienta propone el uso de la librerìa de 39Peers desarrollada por Kundan Singh para el desarrollo de una herramienta interactiva que permita auditar sistemas VoIP basados en SIP.
 
@@ -105,6 +79,30 @@ La presente herramienta propone el uso de la librerìa de 39Peers desarrollada p
 Registrar una extensión SIP:
 
 `python sipot.py --register --username 109 --pwd abc123 --reg-ip 192.168.56.77`
+
+### Dependencias: ###
+Todas las dependencias han sido embebidas dentro del paquete. Pueden encontrarse las librerías utilizadas dentro de la carpeta /lib.
+
+#### 39 Peers ####
+> "_The 39 Peers project aims at implementing an open-source peer-to-peer Internet telephony software using the Session Initiation Protocol (P2P-SIP) in the Python programming language._"
+
+*   **Link:** [39 Peers](https://pypi.python.org/pypi/multitask/) .
+*   **Licencia:** GNU/GPL.
+*   **Uso:** Librería básica del protocolo SIP.
+
+#### Multitask 0.2.0 ####
+> "_Cooperative multitasking and asynchronous I/O using generators_"
+
+*   **Link:** [Multitask 0.2.0](https://pypi.python.org/pypi/multitask/).
+*   **Licencia:** MIT License.
+*   **Uso:** Para generar tareas simultaneas.
+
+#### Sulley ####
+> "_Pure Python fully automated and unattended fuzzing framework_"
+
+*   **Link:** [Sulley](https://code.google.com/p/sulley/).
+*   **Licencia:** GNU GPL v2.
+*   **Uso:** Para generar los mensajes y mutarlos en el modo fuzzing.
 
 ## Módulos: ##
 La presente herramienta consta de (3) módulos principales, con sus diferentes opciones, para explotar tres de los ataques más comunes realizados a servidores SIP:
