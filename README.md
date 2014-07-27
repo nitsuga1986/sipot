@@ -146,7 +146,53 @@ Flood 500 Msg to 192.168.56.77 changing extentions with dictionary:
 
 
 ### Fuzzing ###
-_**Estado:** En desarrollo._
+_**Estado:** Completo (en verificación)._
+
+#### Descripción ####
+
+> La técnica del [Fuzz testing](http://en.wikipedia.org/wiki/Fuzz_testing) consiste en realizar diferentes test de software capaces de generar y enviar datos secuenciales o aleatorios a una aplicación, con el objeto de detectar defectos o vulnerabilidades. El fuzzing sirve para encontrar vulnerabilidades del tipo: format string, integer overflow, buffer overflow, format string, etc.
+
+Este módulo se encarga del envío de mensajes SIP a la dirección destino en un flujo continuo e ininterrumpido. Con cada envío, el mensaje es _mutado_ con leves variaciones en los campos enviados. El objetivo del módulo es el de generar denegación de servicio en el servidor a través de explotar una vulnerabilidad de _parseo_, _buffer overlow_, etc. El módulo posee opciones expuestas para cambiar el módulo generador de mensajes (`--fuzz-fuzzer`), limitar la cantidad máxima de mensajes enviados (`--fuzz-max=FUZZ_MAX_MSGS`), en incluse realizar una verificación automática de la disponibilidad del servidor (`--fuzz-crash`). Para la generación de mensajes y sus mutaciones se utiliza como base el framework con licencia _GNU GPL v2_ llamado [Sulley](https://code.google.com/p/sulley/).
+
+
+#### Opciones ####
+    -l, --fuzz-fuzzer-list
+                        Display a list of available fuzzers or display help on
+                        a specific fuzzer if the -f option is also provided
+    --fuzz-fuzzer=FUZZER
+                        Set fuzzer. Default is InviteCommonFuzzer. Use -l to
+                        see a list of all available fuzzers
+    --fuzz-crash        Enables crash detection
+    --fuzz-crash-method=CRASH_METHOD
+                        Set crash method. By default uses OPTIONS message and
+                        stores response.
+    --fuzz-crash-no-stop
+                        If selected prevents the app to be stoped when a crash
+                        is detected.
+    --fuzz-max=FUZZ_MAX_MSGS
+                        Sets the maximum number of messages to be sent by
+                        fuzzing mode. Default is max available in fuzzer.
+    --fuzz-to-file=FILE_NAME
+                        Print the output to a file with the given name.
+
+#### Ejemplos ####
+Fuzzes the headers commonly found in a SIP INVITE request to 192.168.56.77:
+
+`python sipot.py --sipot-mode fuzzing --to sip:109@192.168.56.77:5060`
+
+Fuzzes the headers commonly found in a SIP REGISTER request to 192.168.56.77:
+
+`python sipot.py --sipot-mode fuzzing --fuzz-fuzzer REGISTERFuzzer --to sip:109@192.168.56.77:5060`
+
+Uses all available fuzzers to 192.168.56.77:
+
+`python sipot.py --sipot-mode fuzzing --fuzz-fuzzer --fuzz-max 10 All --to sip:109@192.168.56.77:5060`
+
+Fuzz and print results to a file:
+
+`python sipot.py --sipot-mode fuzzing --fuzz-crash --fuzz-to-file example_fuzz_results.txt --to sip:109@192.168.56.77:5060`
+
+
 
 ### Spoofing ###
 _**Estado:** No desarrollado aún._
