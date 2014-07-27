@@ -201,7 +201,7 @@ _**Estado:** No desarrollado aún._
 
 
 
-
+-- Notas --
 [Markup Preview](http://github-markup.dfilimonov.com/)
 [MultiMarkdown](https://github.com/fletcher/MultiMarkdown/blob/master/Documentation/Markdown%20Syntax.md)
 
