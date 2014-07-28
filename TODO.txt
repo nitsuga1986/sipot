@@ -1,9 +1,7 @@
 // APP GRAL =====================================
-* Mover todas las dependencias a la carpeta /lib
 
 // FLOODER ======================================
 
 // FUZZER =======================================
-* Mejorar crash detection.
 
 // SPOOFER ======================================

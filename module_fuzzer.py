@@ -34,6 +34,7 @@ class fuzzerUser(User):
 		self.crash_method  = app.options.crash_method
 		self.fuzz_max_msgs  = app.options.fuzz_max_msgs
 		self.no_stop_at_crash  = app.options.no_stop_at_crash
+		self.audit_file_name  = app.options.audit_file_name
 		#Fuzzer sets
 		self._fuzzerGen = None
 		self._setCrashGen = None
@@ -44,6 +45,7 @@ class fuzzerUser(User):
 		self.crash_det_state = None
 		self.crash_porbe = None
 		self.crash_fuzz = None
+		self.request_porbe = None
 		
 	def stop(self):
 		if self._listenerGen:
@@ -52,6 +54,8 @@ class fuzzerUser(User):
 			self._registerGen.close()
 		if self._fuzzerGen:
 			self._fuzzerGen.close()
+		if self.audit_file_name:
+			self.audit_file_name.close()
 		self._registerGen = None
 		return self
 		
@@ -149,6 +153,8 @@ class fuzzerUser(User):
 			for item in fuzzers:
 				self.mutations += s_get(fuzzers.get(item)).num_mutations()
 		Fuzz_Generator = _createFuzzerMsgGen(mutable_msg)
+		if self.audit_file_name:
+			self.audit_file_name = open(self.audit_file_name, 'w')
 		print "Fuzzing %s messages to %s" % (self.mutations, addr)
 		try:
 			if self.sock:
@@ -161,12 +167,16 @@ class fuzzerUser(User):
 							if len(data) > 9216:
 								data = data[:9216]
 							try:
+								# SEND FUZZ MSG
 								self.sock.sendto(data, addr)
+								# Index
 								self.fuzz_index += 1
 								fuzzingCtrl(self.fuzz_index)
+								if self.audit_file_name:
+									self.audit_file_name.write("Index "+str(self.fuzz_index)+"\n--\n"+data+"\n--\n\n")
 								self.crash_fuzz=self.WAIT_CRSH_CHK
 								# if crash detect => wait until crash detection is completed
-								# print '1. Fuzz sent'
+								#print '1. Fuzz sent'
 								while (self.crash_detect and self.crash_fuzz!=self.WAIT_FUZZ):
 									yield multitask.sleep(1)
 							except socket.error:
@@ -198,31 +208,30 @@ class fuzzerUser(User):
 							if self.crash_fuzz==self.WAIT_CRSH_CHK and self.crash_porbe==self.CRASH_PROBE_REC:
 								# If response to fuzz is received
 								# m._parse(data)
-								self.app.fuzzResponse[str(self.fuzz_index)] = data.split('\n', 1)[0].replace('\r','')
+								self.app.fuzzResponse[self.fuzz_index] = data.split('\n', 1)[0].replace('\r','')
 								self.crash_porbe=self.FUZZ_RECV
 							elif self.crash_fuzz==self.WAIT_CRSH_CHK and self.crash_porbe==self.CRASH_PROBE_SENT:
 								# If response to probe received
 								self._stack.received(data, remote)
-								self.app.probeResponse[str(self.fuzz_index)] = data.split('\n', 1)[0].replace('\r','')
+								self.app.probeResponse[self.fuzz_index] = data.split('\n', 1)[0].replace('\r','')
 						except ValueError, E: # TODO: send 400 response to non-ACK request
 							logger.debug('Error in received message:', E)
 							logger.debug(traceback.print_exc())
 				except multitask.Timeout:
 					if self.state == self.FUZZING and self.crash_detect:
-						print (bcolors.FAIL+"Crash detected!"+bcolors.ENDC +" It seems that we found a server crash. If this is a false-positive you can use --fuzz-crash-no-stop option to prevent the app stop at crash detection.")
+						print (bcolors.FAIL+"Crash detected!"+bcolors.ENDC +" It seems that we found a server crash. Server is not responding. If this is a false-positive you can use --fuzz-crash-no-stop option to prevent the app stop at crash detection.")
 						self.app.printResults()
 						self.app.stop()
-					
 		except GeneratorExit: pass
 		except: print 'User._listener exception', (sys and sys.exc_info() or None); traceback.print_exc(); raise
 		logger.debug('terminating User._listener()')
 
 	def _setCrashDetect(self):
 		try:
-			request_porbe = self._ua.createRequest(self.crash_method)
+			self.request_porbe = self._ua.createRequest(self.crash_method)
 			r = []
 			for i in range(3): # 3 responses to get default response
-				self._ua.sendRequest(request_porbe)
+				self._ua.sendRequest(self.request_porbe)
 				self.crash_porbe = self.CRASH_PROBE_SENT
 				WaitingResponse = True
 				while WaitingResponse:
@@ -245,30 +254,37 @@ class fuzzerUser(User):
 						WaitingResponse = True
 						while WaitingResponse: 		# If fuzz sent => wait fuzz response.
 							if self.crash_porbe==self.FUZZ_RECV:
-								# print '2. Fuzz responded'
+								#print '2. Fuzz responded'
 								WaitingResponse = False
 							yield
 						# Fuzz response received => send probe
-						request_porbe.CSeq = rfc3261.Header(str(request_porbe.CSeq.number+1) + ' ' + request_porbe.CSeq.method, 'CSeq')
-						self._ua.sendRequest(request_porbe)
-						# print '3. Probe sent'
+						self.request_porbe.CSeq = rfc3261.Header(str(self.request_porbe.CSeq.number+1) + ' ' + self.request_porbe.CSeq.method, 'CSeq')
+						self._ua.sendRequest(self.request_porbe)
+						#print '3. Probe sent'
 						self.crash_porbe = self.CRASH_PROBE_SENT
 						WaitingResponse = True
 						while WaitingResponse: 		# Probe sent => wait probe response.
 							response = (yield self._ua.queue.get())
 							if response:
-								# print '4. Probe responded'
+								#print '4. Probe responded'
+								#End probe transaction
+								self._ua.stack.transactions.itervalues().next().state = 'terminated'
 								if self.no_stop_at_crash: pass
 								else:
 									r[0] = self.crash_response
 									r[1] = response
-									if ((str(r[0].Cseq) == str(r[1].Cseq))and(str(r[0].Via) == str(r[1].Via))and(str(r[0].From) == str(r[1].From))) or str(r[1].response) == '408':
-										print (bcolors.FAIL+"Crash detected!"+bcolors.ENDC +" It seems that we found a server crash. If this is a false-positive you can use --fuzz-crash-no-stop option to prevent the app stop at crash detection.")
+									if ((str(self.request_porbe.CSeq) == str(r[1].Cseq))and(str(r[0].Via)!= str(r[1].Via))and(str(r[0].From) != str(r[1].From))):
+										print (bcolors.FAIL+"Crash detected!"+bcolors.ENDC +" It seems that we found a server crash. Response different from default. If this is a false-positive you can use --fuzz-crash-no-stop option to prevent the app stop at crash detection.")
 										self.app.printResults()
 										self.app.stop()
-								WaitingResponse = False
-								self.crash_porbe = self.CRASH_PROBE_REC
-								self.crash_fuzz = self.WAIT_FUZZ
+									elif str(r[1].response) == '408':
+										print (bcolors.FAIL+"Crash detected!"+bcolors.ENDC +" It seems that we found a server crash. Request timeout. If this is a false-positive you can use --fuzz-crash-no-stop option to prevent the app stop at crash detection.")
+										self.app.printResults()
+										self.app.stop()
+								if str(self.request_porbe.CSeq) == str(r[1].Cseq):
+									WaitingResponse = False
+									self.crash_porbe = self.CRASH_PROBE_REC
+									self.crash_fuzz = self.WAIT_FUZZ
 					yield
 				#####################################################
 				#####################################################
@@ -307,16 +323,18 @@ class FuzzingApp(App):
 			width = 60
 			labels = ('Index','Fuzz response','Probe response')
 			rows = list()
-			for index in sorted(self.fuzzResponse.keys()):
-				rows.append((index,self.fuzzResponse[index],self.probeResponse[index]))
+			for index in sorted(self.fuzzResponse):
+				rows.append((str(index),self.fuzzResponse[index],self.probeResponse[index]))
 			if self.options.file_name:
-				target = open (self.options.file_name, 'a')
+				target = open (self.options.file_name, 'w')
 				target.write(indent([labels]+rows,hasHeader=True, prefix='| ', postfix=' |',wrapfunc=lambda x: wrap_onspace(x,width)))
 				target.close()
 				print "Find results at file: <"+self.options.file_name+">"
 			else:
 				print indent([labels]+rows,hasHeader=True, prefix='| ', postfix=' |',wrapfunc=lambda x: wrap_onspace(x,width))
-			
+			if self.options.audit_file_name :
+				print "Find audit index at file: <"+self.options.audit_file_name +">"
+				
 	def mainController(self):
 		logger.info("ntsga: start fuzzing controller")
 		while True:

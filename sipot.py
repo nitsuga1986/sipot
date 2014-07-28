@@ -61,6 +61,10 @@ if __name__ == '__main__':
 	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer --fuzz-max 10 All --to sip:109@192.168.56.77:5060 \r\n"
 	usage += "\t *** Print results to a file: ***\r\n"
 	usage += "\t python %prog --sipot-mode fuzzing --fuzz-crash --fuzz-to-file example_fuzz_results.txt --to sip:109@192.168.56.77:5060 \r\n"
+	usage += "\t *** Print results to a file: ***\r\n"
+	usage += "\t python %prog --sipot-mode fuzzing --fuzz-crash --fuzz-to-file example_fuzz_results.txt --fuzz-audit example_fuzz_audit.txt --to sip:109@192.168.56.77:5060 \r\n"
+	
+	
 	usage += "\r\n"
 	usage += "Spoofing mode:\r\n"
 	usage += "\r\n"
@@ -113,6 +117,7 @@ if __name__ == '__main__':
 	group5.add_option('',   '--fuzz-crash-no-stop', default=False, action='store_true', dest='no_stop_at_crash', help='If selected prevents the app to be stoped when a crash is detected.')
 	group5.add_option('',   '--fuzz-max', dest='fuzz_max_msgs', default=99999, type="int", help='Sets the maximum number of messages to be sent by fuzzing mode. Default is max available in fuzzer.')
 	group5.add_option('',   '--fuzz-to-file', dest='file_name', default=None, help='Print the output to a file with the given name.')
+	group5.add_option('',   '--fuzz-audit', dest='audit_file_name', default=None, help='Enables fuzzing audit. All messages sent (fuzzing) will be saved into the given file name.')
 	parser.add_option_group(group5)
 	
 	group6 = OptionGroup(parser, 'Generate Extention options', 'Extensions options for flooding. Changes the originator extention in each message.')
@@ -197,7 +202,8 @@ if __name__ == '__main__':
 		options.fromAddr.uri.port = options.port
 	# Validate Flooding options
 	if options.flood_msg_file and not FileCheck(options.flood_msg_file): sys.exit(-1)
-		
+	# Validate Fuzzing options
+	if not options.crash_detect: options.audit_file_name = None
 	
 class bcolors:
 	HEADER = '\033[95m'

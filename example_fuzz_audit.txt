@@ -1,0 +1,512 @@
+Index 1
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 0 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bKq6cvok48ay2ji7pu9br0wf3h1ndtgzx5;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: q6cvok48ay2ji7pu9br0wf3h1ndtgzx5@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 2
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 1 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bK4gjqldk5y2xmn8fpb7s1i6zcrtawv9e3;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: 4gjqldk5y2xmn8fpb7s1i6zcrtawv9e3@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 3
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 2 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bKz7d14u23g56xqsmpir8jbtfvawkno0ey;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: z7d14u23g56xqsmpir8jbtfvawkno0ey@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 4
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 3 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bK1mwi4d85at92s37vuzqnekxljyocfbr6;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: 1mwi4d85at92s37vuzqnekxljyocfbr6@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 5
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 4 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bKovptjzn5481flm36cq7ksuy9a0rwdg2x;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: ovptjzn5481flm36cq7ksuy9a0rwdg2x@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 6
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 5 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bKq91gzhmy8bxo5na632jev7lkspr0uw4d;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: q91gzhmy8bxo5na632jev7lkspr0uw4d@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 7
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 6 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bKqawrxgu82ho3lnzckpv17tmybdies540;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: qawrxgu82ho3lnzckpv17tmybdies540@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 8
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 7 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bKg253v4nahslorixt9168ekzcf0md7pbq;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: g253v4nahslorixt9168ekzcf0md7pbq@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 9
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 8 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bKciykpsu8736xnhew954g10advrjb2mqf;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: ciykpsu8736xnhew954g10advrjb2mqf@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 10
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 9 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bKfwhb376uayzspd891nr02vog5mxiclke;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: fwhb376uayzspd891nr02vog5mxiclke@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 11
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 2147483637 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bKkerqb5szj8cia6f0hnpyg9mo4xutd17v;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: kerqb5szj8cia6f0hnpyg9mo4xutd17v@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 12
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 2147483638 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bKk8t04zx3yog5lufjqwane2d6vmip7c9h;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: k8t04zx3yog5lufjqwane2d6vmip7c9h@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 13
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 2147483639 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bKma0lcost946wybdn3vpjz85rih7fk21g;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: ma0lcost946wybdn3vpjz85rih7fk21g@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 14
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 2147483640 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bKsfmabzpinr42chvxk0836wloyq7dju5t;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: sfmabzpinr42chvxk0836wloyq7dju5t@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 15
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 2147483641 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bKtu4z816imn7opywf2dxhrcegjb3l9qa5;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: tu4z816imn7opywf2dxhrcegjb3l9qa5@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
+Index 16
+--
+INVITE sip:109@192.168.56.77 SIP/2.0
+CSeq: 2147483642 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bK2bk58j3vp1m7na0f4t9dlseyxi6huogc;ttl=70;maddr=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;received=aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa:aaaa;rport
+From: "SIPOT" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>;tag=somefromtagval
+Call-ID: 2bk58j3vp1m7na0f4t9dlseyxi6huogc@TheKlatchianHead
+To: "109" <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>
+Contact: <sip:109:password@192.168.56.77:5060;transport=udp;user=udp;ttl=67;method=INVITE;maddr=192.168.56.77?subject=hval&hname2=hval>q=0.5;expires=1337;sometoken=somevalue
+Max-Forwards: 70
+Content-Type: application/sdp;mattr=mvalue
+Content-Length: 379
+
+v=0
+o=- 1190505265 1190505265 IN IP4 192.168.56.77
+s=Opal SIP Session
+c=IN IP4 192.168.56.77
+t=0 0
+m=audio 5028 RTP/AVP 101 96 3 107 110 0 8
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=rtpmap:96 SPEEX/16000
+a=rtpmap:3 GSM/8000
+a=rtpmap:107 MS-GSM/8000
+a=rtpmap:110 SPEEX/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+m=video 5030 RTP/AVP 31
+a=rtpmap:31 H261/90000
+
+--
+
