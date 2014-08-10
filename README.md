@@ -136,11 +136,11 @@ Flood 500 Msg to 192.168.56.77:
 
 Flood 500 Msg from File to 192.168.56.77:
 
-`python sipot.py --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --flood-msg-file example_sipot_flood_this.txt`
+`python sipot.py --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --flood-msg-file examples/example_sipot_flood_this.txt`
 
 Flood 500 Msg to 192.168.56.77 changing extentions with dictionary:
 
-`python sipot.py --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary example_sipot_ext_dict.txt` 
+`python sipot.py --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary examples/example_sipot_ext_dict.txt` 
 
 
 ### Fuzzing ###
@@ -188,7 +188,7 @@ Uses all available fuzzers to 192.168.56.77:
 
 Fuzz and print results to a file:
 
-`python sipot.py --sipot-mode fuzzing --fuzz-crash --fuzz-to-file example_fuzz_results.txt --to sip:109@192.168.56.77:5060`
+`python sipot.py --sipot-mode fuzzing --fuzz-crash --fuzz-to-file examples/example_fuzz_results.txt --to sip:109@192.168.56.77:5060`
 
 
 

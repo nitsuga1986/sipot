@@ -8,5 +8,3 @@ Contact: <sip:109@127.0.1.1:5062>
 CSeq: 4 REGISTER
 Max-Forwards: 70
 Call-ID: 785850338@127.0.1.1
-
-

@@ -1,0 +1,9 @@
+INVITE sip:111@192.168.1.128:58386;ob SIP/2.0
+Via: SIP/2.0/UDP 192.168.1.77:5060;branch=z9hG4bK308d9fb4
+Max-Forwards: 70
+From: "SIPOT Caller ID" <sip:666@192.168.1.77>;tag=as250d310b
+To: <sip:111@192.168.1.128:58386;ob>
+Contact: <sip:666@192.168.1.129:5060>
+Call-ID: 3e09b52e34bf0cb44ca18ce36ff6756d@192.168.1.77:5060
+CSeq: 102 INVITE
+Content-Length: 0

@@ -21,6 +21,7 @@ class flooderUser(User):
 		self.flood_msg = 0
 		self.start_flood_time = None
 		self.flood_msg_file = app.options.flood_msg_file
+		self.flood_noparse = app.options.flood_noparse
 	def stop(self):
 		if self._listenerGen:
 			self._listenerGen.close()
@@ -60,7 +61,10 @@ class flooderUser(User):
 					file_txt=file_txt.read()
 				m = rfc3261.Message()
 				try:
-					m = m._parse(file_txt)
+					if self.flood_noparse:
+						m = file_txt
+					else:
+						m = m._parse(file_txt.rstrip()+'\r\n\r\n\r\n')
 				except ValueError, E: pass # TODO: send 400 response to non-ACK request
 			else:
 				m = self._ua.createRequest(self.flood_method)
@@ -69,7 +73,7 @@ class flooderUser(User):
 				m.Expires = rfc3261.Header(str(self.app.options.register_interval), 'Expires')
 			return m
 		def _createFloodMsgGen(message_generated):
-			if self.app.options.modify_extentions:
+			if self.app.options.modify_extentions and not self.flood_noparse:
 				if self.app.options.ExtDictionary is not None:
 					try:
 						dictionary = open(self.app.options.ExtDictionary,'r')
@@ -99,7 +103,10 @@ class flooderUser(User):
 		# Msg generator
 		base_msg = _createBaseMessage()
 		flood_msg = _createFloodMsgGen(base_msg)
-		print "Flooding %s %s messages to %s" % (self.flood_num, base_msg.method, addr)
+		if self.flood_noparse:
+			print "Flooding %s NOPARSED messages to %s" % (self.flood_num, addr)
+		else:
+			print "Flooding %s %s messages to %s" % (self.flood_num, base_msg.method, addr)
 		try:
 			if self.sock:
 				if self.sock.type == socket.SOCK_STREAM:

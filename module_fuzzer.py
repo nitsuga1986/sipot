@@ -46,6 +46,8 @@ class fuzzerUser(User):
 		self.crash_porbe = None
 		self.crash_fuzz = None
 		self.request_porbe = None
+        #Listener
+		self.listenerOff = False if self.crash_detect else True
 		
 	def stop(self):
 		if self._listenerGen:
@@ -138,7 +140,7 @@ class fuzzerUser(User):
 							yield (m)
 		
 		# Stop listener if no crash detection is been used
-		if not self.crash_detect: self._listenerGen.close()
+		if self.listenerOff: self._listenerGen.close()
 		# Dest Address
 		addr = self.remoteTarget.uri
 		if addr and isinstance(addr, rfc2396.URI):

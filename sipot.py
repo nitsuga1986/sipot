@@ -44,14 +44,16 @@ if __name__ == '__main__':
 	usage += "Register extention:\r\n"
 	usage += "\tpython %prog --register --username 109 --pwd abc123 --reg-ip 192.168.56.77 \r\n"
 	usage += "\r\n"
+	
 	usage += "Flooding mode:\r\n"
 	usage += "\t *** Flood 500 Msg to 192.168.56.77: ***\r\n"
 	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 \r\n"
 	usage += "\t *** Flood 500 Msg from File to 192.168.56.77: ***\r\n"
-	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --flood-msg-file example_sipot_flood.txt \r\n"
+	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --flood-msg-file examples/example_sipot_flood.txt \r\n"
 	usage += "\t *** Flood 500 Msg to 192.168.56.77 changing extentions with dictionary: ***\r\n"
-	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary example_sipot_ext_dict.txt \r\n"
+	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary examples/example_sipot_ext_dict.txt \r\n"
 	usage += "\r\n"
+	
 	usage += "Fuzzing mode:\r\n"
 	usage += "\t *** Fuzzes the headers commonly found in a SIP INVITE request to 192.168.56.77: ***\r\n"
 	usage += "\t python %prog --sipot-mode fuzzing --to sip:109@192.168.56.77:5060 \r\n"
@@ -60,13 +62,14 @@ if __name__ == '__main__':
 	usage += "\t *** Uses all available fuzzers to 192.168.56.77: ***\r\n"
 	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer --fuzz-max 10 All --to sip:109@192.168.56.77:5060 \r\n"
 	usage += "\t *** Print results to a file: ***\r\n"
-	usage += "\t python %prog --sipot-mode fuzzing --fuzz-crash --fuzz-to-file example_fuzz_results.txt --to sip:109@192.168.56.77:5060 \r\n"
+	usage += "\t python %prog --sipot-mode fuzzing --fuzz-crash --fuzz-to-file examples/example_fuzz_results.txt --to sip:109@192.168.56.77:5060 \r\n"
 	usage += "\t *** Print results to a file: ***\r\n"
-	usage += "\t python %prog --sipot-mode fuzzing --fuzz-crash --fuzz-to-file example_fuzz_results.txt --fuzz-audit example_fuzz_audit.txt --to sip:109@192.168.56.77:5060 \r\n"
-	
-	
+	usage += "\t python %prog --sipot-mode fuzzing --fuzz-crash --fuzz-to-file examples/example_fuzz_results.txt --fuzz-audit examples/example_fuzz_audit.txt --to sip:109@192.168.56.77:5060 \r\n"
 	usage += "\r\n"
+	
 	usage += "Spoofing mode:\r\n"
+	usage += "\t *** Spoofs Caller ID from message provided in file: ***\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --to sip:111@192.168.1.128:58386 --spoof-msg-file examples/example_sipot_spoof_this.txt \r\n"
 	usage += "\r\n"
 	
 	parser = OptionParser(usage,version="%prog v"+str(__version__)+__GPL__)
@@ -77,7 +80,7 @@ if __name__ == '__main__':
 	group1 = OptionGroup(parser, 'Network', 'Use these options for network configuration')
 	group1.add_option('',   '--transport', dest='transport', default='udp', help='the transport type is one of "udp", "tcp" or "tls". Default is "udp"')
 	group1.add_option('',   '--int-ip',  dest='int_ip',  default='0.0.0.0', help='listening IP address for SIP and RTP. Use this option only if you wish to select one out of multiple IP interfaces. Default "0.0.0.0"')
-	group1.add_option('',   '--port',    dest='port',    default=5060, type="int", help='listening port number for SIP UDP/TCP. TLS is one more than this. Default is 5092')
+	group1.add_option('',   '--port',    dest='port',    default=5062, type="int", help='listening port number for SIP UDP/TCP. TLS is one more than this. Default is 5092')
 	group1.add_option('',   '--fix-nat', dest='fix_nat', default=False, action='store_true', help='enable fixing NAT IP address in Contact')
 	group1.add_option('',   '--max-size',dest='max_size', default=4096, type='int', help='size of received socket data. Default is 4096')
 	group1.add_option('',   '--interval',dest='interval', default=180, type='int', help='The interval argument specifies how often should the sock be checked for close, default is 180 s')
@@ -107,10 +110,11 @@ if __name__ == '__main__':
 	group4.add_option('',   '--flood-number', dest='flood_num', default=666, type="int", help='Sets the number of messages to be sent by flooding mode. Default is 500.')
 	group4.add_option('',   '--flood-method', dest='flood_method', default='REGISTER', help='Set the method to flood. Default is REGISTER.')
 	group4.add_option('',   '--flood-msg-file', dest='flood_msg_file', default=None, help='Provide a message from file to flood.')
+	group4.add_option('', 	'--flood-file-noparse', default=False, action='store_true', dest='flood_noparse', help='Prevents the flooder to parse the message. By default try to parse.')
 	parser.add_option_group(group4)
 	
 	group5 = OptionGroup(parser, 'Fuzzing Mode', 'use this options to set fuzzing parameters')
-	group5.add_option('-l', '--fuzz-fuzzer-list', default=False, action='store_true', dest='list_fuzzers', help='Display a list of available fuzzers or display help on a specific fuzzer if the -f option is also provided')
+	group5.add_option('-l', '--fuzz-fuzzer-list', default=False, action='store_true', dest='list_fuzzers', help='Display a list of available fuzzers')
 	group5.add_option('',   '--fuzz-fuzzer', dest='fuzzer', default='InviteCommonFuzzer', help='Set fuzzer. Default is InviteCommonFuzzer. Use -l to see a list of all available fuzzers')
 	group5.add_option('',   '--fuzz-crash', default=False, action='store_true', dest='crash_detect', help='Enables crash detection')
 	group5.add_option('',   '--fuzz-crash-method', dest='crash_method', default='OPTIONS', help='Set crash method. By default uses OPTIONS message and stores response.')
@@ -120,14 +124,22 @@ if __name__ == '__main__':
 	group5.add_option('',   '--fuzz-audit', dest='audit_file_name', default=None, help='Enables fuzzing audit. All messages sent (fuzzing) will be saved into the given file name.')
 	parser.add_option_group(group5)
 	
-	group6 = OptionGroup(parser, 'Generate Extention options', 'Extensions options for flooding. Changes the originator extention in each message.')
-	group6.add_option('',   '--no-modify-ext',dest='modify_extentions', default=True, action='store_false', help='If not specified, extentions will be modified in each message flooded. To generate extentions options --ext-dictionary &--ext-range  will be used.')
-	group6.add_option('',   "--ext-dictionary", dest="ExtDictionary", type="string",help="Specify a dictionary file with possible extension names")
-	group6.add_option('',   "--ext-range", dest="ExtRange", default='100-999',metavar="RANGE",help="Specify an extension or extension range\r\nexample: -e 100-999,1000-1500,9999")
-	group6.add_option('',   "--ext-range-zeropadding", dest="ExtZeropadding", type="int",help="""the number of zeros used to padd the username.the options "-e 1-9999 -z 4" would give 0001 0002 0003 ... 9999""")
-	group6.add_option('',   '--ext-range-template',  dest="ExtTemplate",action="store",help="""A format string which allows us to specify a template for the extensions example svwar.py -e 1-999 --template="123%#04i999" would scan between 1230001999 to 1230999999" """)
-	group6.add_option('',   '--ext-range-enabledefaults', dest="ExtDefaults", action="store_true", default=False, help="""Scan for default / typical extensions such as 1000,2000,3000 ... 1100, etc. This option is off by default. Use --enabledefaults to enable this functionality""")
+	group6 = OptionGroup(parser, 'Spoofing Mode', 'use this options to set spoof parameters')
+	group6.add_option('-L', '--spoof-list', default=False, action='store_true', dest='list_spoof', help='Display a list of available spoof modes.')
+	group6.add_option('',   '--spoof-method', dest='spoof_method', default='INVITE', help='Set the method to spoof. Default is INVITE.')
+	group6.add_option('',   '--spoof', dest='spoof_mode', default='callerID', help='Set the method to spoof. Default is INVITE.')
+	group6.add_option('',   '--spoof-name', dest='spoof_name', default='SIPOT Caller ID', help='Set the method to spoof. Default is INVITE.')
+	group6.add_option('',   '--spoof-msg-file', dest='spoof_msg_file', default=None, help='Spoof message from file.')
 	parser.add_option_group(group6)
+	
+	group7 = OptionGroup(parser, 'Generate Extention', 'Extensions options for flooding. Changes the originator extention in each message.')
+	group7.add_option('',   '--no-modify-ext',dest='modify_extentions', default=True, action='store_false', help='If not specified, extentions will be modified in each message flooded. To generate extentions options --ext-dictionary &--ext-range  will be used.')
+	group7.add_option('',   "--ext-dictionary", dest="ExtDictionary", type="string",help="Specify a dictionary file with possible extension names")
+	group7.add_option('',   "--ext-range", dest="ExtRange", default='100-999',metavar="RANGE",help="Specify an extension or extension range\r\nexample: -e 100-999,1000-1500,9999")
+	group7.add_option('',   "--ext-range-zeropadding", dest="ExtZeropadding", type="int",help="""the number of zeros used to padd the username.the options "-e 1-9999 -z 4" would give 0001 0002 0003 ... 9999""")
+	group7.add_option('',   '--ext-range-template',  dest="ExtTemplate",action="store",help="""A format string which allows us to specify a template for the extensions example svwar.py -e 1-999 --template="123%#04i999" would scan between 1230001999 to 1230999999" """)
+	group7.add_option('',   '--ext-range-enabledefaults', dest="ExtDefaults", action="store_true", default=False, help="""Scan for default / typical extensions such as 1000,2000,3000 ... 1100, etc. This option is off by default. Use --enabledefaults to enable this functionality""")
+	parser.add_option_group(group7)
 	
 	(options, args) = parser.parse_args()
     
@@ -144,6 +156,8 @@ if __name__ == '__main__':
 		
 	if options.list_fuzzers:
 		list_fuzzers = """
+------------------------------------------------------------------------------------------------
+	List of available FUZZERS (select vector to fuzz the message):
 	> InviteCommonFuzzer[6775] (default): Fuzzes the headers commonly found and most likely to be processed in a SIP INVITE request
 
 	> InviteStructureFuzzer[943]: Fuzzes the structure of a SIP request by repeating blocks, fuzzing delimiters and generally altering how a SIP request is structured.
@@ -156,6 +170,16 @@ if __name__ == '__main__':
 	> ACKFuzzer[3106]: A fuzzer for the ACK SIP verb that first attempts to manipulate the target device into a state where it would expect an ACK.
 		
 	> All[42287]: Uses all the fuzzers.
+------------------------------------------------------------------------------------------------
+		"""
+		print list_fuzzers
+		sys.exit(-1)
+	if options.list_spoof:
+		list_fuzzers = """
+------------------------------------------------------------------------------------------------
+	Available SPOOF MODES (select what to spoof):
+	> callerID: this mode spoofs the destiny Caller ID showing the specified --spoof-name.
+------------------------------------------------------------------------------------------------
 		"""
 		print list_fuzzers
 		sys.exit(-1)
@@ -204,7 +228,7 @@ if __name__ == '__main__':
 	if options.flood_msg_file and not FileCheck(options.flood_msg_file): sys.exit(-1)
 	# Validate Fuzzing options
 	if not options.crash_detect: options.audit_file_name = None
-	
+
 class bcolors:
 	HEADER = '\033[95m'
 	OKBLUE = '\033[94m'
@@ -234,6 +258,7 @@ class User(object):
 		self.register_interval = app.options.register_interval
 		self.reg_refresh = app.options.reg_refresh
 		# SIP options
+		self.username = app.options.username
 		self.reg_username = app.options.reg_username
 		self.password = app.options.password 
 		self.registrarAddr = rfc2396.Address(str('<sip:'+self.reg_username+'@'+app.options.registrar_ip+'>'))
@@ -276,7 +301,7 @@ class User(object):
 	def _createRegister(self):
 		'''Create a REGISTER Message and populate the Expires and Contact headers. It assumes
 		that self.reg is valid.'''
-		m = self._ua.createRegister(self._ua.remoteParty)
+		m = self._ua.createRegister(self._ua.localParty)
 		m.Contact = rfc3261.Header(str(self._stack.uri), 'Contact')
 		m.Contact.value.uri.user = self.localParty.uri.user
 		m.Expires = rfc3261.Header(str(self.app.options.register_interval), 'Expires')
@@ -299,11 +324,10 @@ class User(object):
 		except: print 'User._listener exception', (sys and sys.exc_info() or None); traceback.print_exc(); raise
 		logger.debug('terminating User._listener()')
 	def _register(self):
-		self.localParty = self.registrarAddr.dup()
-		self.remoteParty = self.registrarAddr.dup()
-		self.remoteTarget = self.registrarAddr.dup()
+		self._ua.localParty, self._ua.remoteParty, self._ua.remoteTarget = self.registrarAddr.dup(), self.registrarAddr.dup(), self.registrarAddr.dup()
 		self.reg_result, self.reg_reason = yield self._registerUA()
 		if self.reg_result=='success': 
+			self._ua.localParty, self._ua.remoteParty, self._ua.remoteTarget = self.localParty.dup(), self.remoteParty.dup(), self.remoteTarget.dup()
 			if self.reg_state == None:
 				self.reg_state = self.REGISTERED
 				self.app.status.append(bcolors.OKGREEN+"Register succesful!"+bcolors.ENDC +" (user: "+self.app.options.username+", password: "+self.app.options.password+")")
