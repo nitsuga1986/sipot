@@ -68,6 +68,8 @@ if __name__ == '__main__':
 	usage += "\r\n"
 	
 	usage += "Spoofing mode:\r\n"
+	usage += "\t *** Spoofs Caller ID: ***\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --to sip:111@192.168.1.128:58386 --spoof-name Spoofed!\r\n"
 	usage += "\t *** Spoofs Caller ID from message provided in file: ***\r\n"
 	usage += "\t python %prog --sipot-mode spoofing --to sip:111@192.168.1.128:58386 --spoof-msg-file examples/example_sipot_spoof_this.txt \r\n"
 	usage += "\r\n"
@@ -125,10 +127,10 @@ if __name__ == '__main__':
 	parser.add_option_group(group5)
 	
 	group6 = OptionGroup(parser, 'Spoofing Mode', 'use this options to set spoof parameters')
+	group6.add_option('',   '--spoof', dest='spoof_mode', default='spfINVITE', help='Set the method to spoof. Default is INVITE.')
 	group6.add_option('-L', '--spoof-list', default=False, action='store_true', dest='list_spoof', help='Display a list of available spoof modes.')
-	group6.add_option('',   '--spoof-method', dest='spoof_method', default='INVITE', help='Set the method to spoof. Default is INVITE.')
-	group6.add_option('',   '--spoof', dest='spoof_mode', default='callerID', help='Set the method to spoof. Default is INVITE.')
 	group6.add_option('',   '--spoof-name', dest='spoof_name', default='SIPOT Caller ID', help='Set the method to spoof. Default is INVITE.')
+	group6.add_option('',   '--spoof-contact', dest='spoof_contact', default=None, help='Set the contact header to spoof. ie. sip:666@192.168.1.129:5060.')
 	group6.add_option('',   '--spoof-msg-file', dest='spoof_msg_file', default=None, help='Spoof message from file.')
 	parser.add_option_group(group6)
 	
@@ -178,7 +180,8 @@ if __name__ == '__main__':
 		list_fuzzers = """
 ------------------------------------------------------------------------------------------------
 	Available SPOOF MODES (select what to spoof):
-	> callerID: this mode spoofs the destiny Caller ID showing the specified --spoof-name.
+	> spfINVITE (default): this mode spoofs INVITE messages. The destiny Caller ID will show the specified --spoof-name.
+	> spfBYE: this mode spoofs BYE messages. It allows to finish established calls.
 ------------------------------------------------------------------------------------------------
 		"""
 		print list_fuzzers
@@ -228,6 +231,10 @@ if __name__ == '__main__':
 	if options.flood_msg_file and not FileCheck(options.flood_msg_file): sys.exit(-1)
 	# Validate Fuzzing options
 	if not options.crash_detect: options.audit_file_name = None
+	# Validate Spoofing options
+	if options.spoof_mode not in ['spfINVITE','spfBYE']:
+		print "<"+options.spoof_mode+"> is not an available spoofing mode. Please check -L."
+		sys.exit(-1)
 
 class bcolors:
 	HEADER = '\033[95m'

