@@ -128,10 +128,14 @@ if __name__ == '__main__':
 	
 	group6 = OptionGroup(parser, 'Spoofing Mode', 'use this options to set spoof parameters')
 	group6.add_option('',   '--spoof', dest='spoof_mode', default='spfINVITE', help='Set the method to spoof. Default is INVITE.')
+	group6.add_option('', 	'--spoof-auto', default=False, action='store_true', dest='spoof_auto', help='Automatically spoofs messages when messages are sniffed.')
 	group6.add_option('-L', '--spoof-list', default=False, action='store_true', dest='list_spoof', help='Display a list of available spoof modes.')
-	group6.add_option('',   '--spoof-name', dest='spoof_name', default='SIPOT Caller ID', help='Set the method to spoof. Default is INVITE.')
+	group6.add_option('',   '--spoof-name', dest='spoof_name', default=None, help='Set the name to spoof.')
 	group6.add_option('',   '--spoof-contact', dest='spoof_contact', default=None, help='Set the contact header to spoof. ie. sip:666@192.168.1.129:5060.')
 	group6.add_option('',   '--spoof-msg-file', dest='spoof_msg_file', default=None, help='Spoof message from file.')
+	group6.add_option('',   '--spoof-lTag', dest='spoof_local_tag', default=None, help='Local tag to use in spoof message. ie: as5c9c6524')
+	group6.add_option('',   '--spoof-rTag', dest='spoof_remote_tag', default=None, help='Remote tag to use in spoof message. ie: 1605a146-d627-e411-8066-0800273bf55a')
+	group6.add_option('',   '--spoof-callID', dest='spoof_callID', default=None, help='Call-ID to use in spoof message. ie: 27679bab736046f14798e8b5593222f3@192.168.56.77:5060')
 	parser.add_option_group(group6)
 	
 	group7 = OptionGroup(parser, 'Generate Extention', 'Extensions options for flooding. Changes the originator extention in each message.')
@@ -232,7 +236,7 @@ if __name__ == '__main__':
 	# Validate Fuzzing options
 	if not options.crash_detect: options.audit_file_name = None
 	# Validate Spoofing options
-	if options.spoof_mode not in ['spfINVITE','spfBYE']:
+	if options.spoof_mode not in ['spfINVITE','spfBYE','spfCANCEL']:
 		print "<"+options.spoof_mode+"> is not an available spoofing mode. Please check -L."
 		sys.exit(-1)
 
@@ -503,6 +507,7 @@ class App(object):
 
 	def exit_gracefully(self, signum, frame):
 		import signal
+		signal.signal(signal.SIGINT, return_original_sigint())
 		try:
 			if raw_input("\nReally quit? (y/n)> ").lower().startswith('y'):
 				self.printResults()
@@ -510,7 +515,8 @@ class App(object):
 		except KeyboardInterrupt:
 			print("Ok ok, quitting")
 			sys.exit(1)
-			
+		signal.signal(signal.SIGINT, exit_gracefully)
+
 	def mainController(self):
 		logger.info("ntsga: start main default controller")
 		while True:
@@ -532,7 +538,13 @@ class App(object):
 	def close(self): 
 		if self.user:
 			self.user.stop()
-
+# Signal exit
+original_sigint = 0
+def set_original_sigint(sigint):
+    global original_sigint    # Needed to modify global copy of globvar
+    original_sigint = sigint
+def return_original_sigint():
+    return original_sigint     # No need for global declaration to read value of globvar
 #-------------------- START APPS---------------------------------
 if __name__ == '__main__':
     try:
@@ -547,6 +559,7 @@ if __name__ == '__main__':
 			import module_spoofer
 			app = module_spoofer.SpoofingApp(options)
         if not 'app' in globals(): app = App(options)
+        set_original_sigint(signal.getsignal(signal.SIGINT))
         signal.signal(signal.SIGINT, app.exit_gracefully)
         app.start()
     except KeyboardInterrupt:

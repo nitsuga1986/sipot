@@ -1,0 +1,22 @@
+SIP/2.0 200 OK
+CSeq: 102 INVITE
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bK07534c0c
+User-Agent: Ekiga/3.2.7
+From: "CelSIP" <sip:111@192.168.56.77>;tag=as684d6359
+Call-ID: 4fd21f2e66eb69d57abaf06a38bc4c2a@192.168.56.77:5060
+To: <sip:108@192.168.56.101>;tag=680245a5-de27-e411-8066-0800273bf55a
+Contact: <sip:108@192.168.56.101>
+Allow: INVITE,ACK,OPTIONS,BYE,CANCEL,SUBSCRIBE,NOTIFY,REFER,MESSAGE,INFO,PING
+Content-Type: application/sdp
+Content-Length: 219
+
+v=0
+o=- 1408652593 1 IN IP4 192.168.56.101
+s=Opal SIP Session
+c=IN IP4 192.168.56.101
+t=0 0
+m=audio 5080 RTP/AVP 0 101
+a=sendrecv
+a=rtpmap:0 PCMU/8000/1
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-16,32,36
