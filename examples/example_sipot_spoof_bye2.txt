@@ -1,22 +1,40 @@
 SIP/2.0 200 OK
+From: "CelSIP" <sip:111@192.168.56.77>;tag=as74d627ab
+To: <sip:108@192.168.56.101>;tag=06edcea0-7929-e411-8130-0800273bf55a
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bK06a46fba
+Call-ID: 4196890432965b9715a3a1d144bfa8ed@192.168.56.77:5060
 CSeq: 102 INVITE
-Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bK07534c0c
-User-Agent: Ekiga/3.2.7
-From: "CelSIP" <sip:111@192.168.56.77>;tag=as684d6359
-Call-ID: 4fd21f2e66eb69d57abaf06a38bc4c2a@192.168.56.77:5060
-To: <sip:108@192.168.56.101>;tag=680245a5-de27-e411-8066-0800273bf55a
-Contact: <sip:108@192.168.56.101>
-Allow: INVITE,ACK,OPTIONS,BYE,CANCEL,SUBSCRIBE,NOTIFY,REFER,MESSAGE,INFO,PING
-Content-Type: application/sdp
-Content-Length: 219
 
-v=0
-o=- 1408652593 1 IN IP4 192.168.56.101
-s=Opal SIP Session
-c=IN IP4 192.168.56.101
-t=0 0
-m=audio 5080 RTP/AVP 0 101
-a=sendrecv
-a=rtpmap:0 PCMU/8000/1
-a=rtpmap:101 telephone-event/8000
-a=fmtp:101 0-16,32,36
+**********CEL****************
+BYE sip:108@192.168.56.101 SIP/2.0
+From: "CelSIP" <sip:111@192.168.56.77>;tag=as74d627ab
+To: <sip:108@192.168.56.101>;tag=06edcea0-7929-e411-8130-0800273bf55a
+Call-ID: 4196890432965b9715a3a1d144bfa8ed@192.168.56.77:5060
+CSeq: 103 BYE
+
+Via: SIP/2.0/UDP 192.168.56.77:5060;branch=z9hG4bK6acd4862
+**********sipot****************
+BYE sip:108@192.168.56.101:5060 SIP/2.0
+From: "CelSIP" <sip:111@192.168.56.77>;tag=as74d627ab
+To: <sip:108@192.168.56.101>;tag=06edcea0-7929-e411-8130-0800273bf55a
+Call-ID: 4196890432965b9715a3a1d144bfa8ed@192.168.56.77:5060
+CSeq: 103 BYE
+
+**********EKI****************
+BYE sip:111@192.168.56.77:5060 SIP/2.0
+From: <sip:108@192.168.56.101>;tag=06edcea0-7929-e411-8130-0800273bf55a
+To: "CelSIP" <sip:111@192.168.56.77>;tag=as74d627ab
+Call-ID: 4196890432965b9715a3a1d144bfa8ed@192.168.56.77:5060
+CSeq: 2 BYE
+
+Via: SIP/2.0/UDP 192.168.56.101:5060;branch=z9hG4bK68a1bcd8-7929-e411-8130-0800273bf55a;rport
+**********new_eki_sipot****************
+BYE sip:111@192.168.56.77:5060 SIP/2.0
+From: <sip:108@192.168.56.101>;tag=06edcea0-7929-e411-8130-0800273bf55a
+To: "CelSIP" <sip:111@192.168.56.77>;tag=as74d627ab
+Call-ID: 4196890432965b9715a3a1d144bfa8ed@192.168.56.77:5060
+
+
+
+
+

