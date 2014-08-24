@@ -255,6 +255,7 @@ Spoofs CANCEL msg and spoof CANCEL from 180 Ringing:
 Automatic spoofing BYE/CANCEL when 200 OK/180 RINGING is detected:
 
 `python sipot.py --sipot-mode spoofing --spoof-auto --spoof spfBYE`
+
 `python sipot.py --sipot-mode spoofing --spoof-auto --spoof spfCANCEL`
 
 
