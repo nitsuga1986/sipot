@@ -1,0 +1,13 @@
+SIP/2.0 180 Ringing
+Via: SIP/2.0/UDP 192.168.1.128:44111;branch=z9hG4bKPjEPg5w-41nW2vBBET2iJTfdJKZJlQFzl6;received=192.168.1.128;rport=44111
+From: <sip:111@192.168.1.77>;tag=ydD2DM365vTw4keO23aHc-q4o0JZ3675
+To: <sip:108@192.168.1.77>;tag=as5fca8089
+Call-ID: DWMR9yPaxJoFCx0WuujKi3YUgO.jXXj4
+CSeq: 25494 INVITE
+Server: FPBX2.11.0beta3(11.3.0)
+Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY, INFO, PUBLISH
+Supported: replaces, timer
+Session-Expires: 1800;refresher=uas
+Contact: <sip:108@192.168.1.77:5060>
+Content-Length: 0
+

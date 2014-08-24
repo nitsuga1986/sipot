@@ -1,11 +1,6 @@
-BYE sip:111@192.168.1.128:55847;ob SIP/2.0
-Via: SIP/2.0/UDP 192.168.1.77:5060;branch=z9hG4bK1db9d399
-Max-Forwards: 70
-From: "DebianEkiga" <sip:108@192.168.1.77>;tag=as0e1f66fb
-To: <sip:111@192.168.1.128:55847;ob>;tag=fz7mbDo9ylefqr0p3AYtnRxZ17QMdM0K
-Call-ID: 7af0f1b0056c1d6c03c4e7f5206e44c4@192.168.1.77:5060
-CSeq: 103 BYE
-User-Agent: FPBX2.11.0beta3(11.3.0)
-X-Asterisk-HangupCause: Normal Clearing
-X-Asterisk-HangupCauseCode: 16
+BYE sip:108@192.168.56.101:5060 SIP/2.0
 Content-Length: 0
+From: "CelSIP" <sip:111@192.168.56.77>;tag=as60e143f9
+To: <sip:108@192.168.56.101>;tag=940f7fc9-262a-e411-8130-0800273bf55a
+CSeq: 103 BYE
+Call-ID: 2214ee6a307d6cbe6e8297ba1f11a91b@192.168.56.77:5060

@@ -1,0 +1,10 @@
+CANCEL sip:108@192.168.1.77:5060 SIP/2.0
+Content-Length: 0
+Via: SIP/2.0/UDP 192.168.1.128:44111;branch=z9hG4bKPjRgvIXm1mHikMcUkwpCzuy93ILUESiVtX;received=192.168.1.128;rport=44111
+From: <sip:111@192.168.1.77>;tag=7o6CSFHCPcBwJR6brdX2gpH8nLODF9DY
+To: <sip:108@192.168.1.77>;tag=as20ecf303
+CSeq: 24333 CANCEL
+Call-ID: uAKZqyxe3X5qaCiRihc5-68SZ5lou0vo
+
+
+

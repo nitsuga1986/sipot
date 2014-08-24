@@ -9,3 +9,4 @@
 7.3. Spoofing BYE
 7.4. Spoofing CANCEL
 7.5. Ataque de MitM spoofing
+	Auto CANCEL host AB - B not cancelling

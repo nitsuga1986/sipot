@@ -72,6 +72,15 @@ if __name__ == '__main__':
 	usage += "\t python %prog --sipot-mode spoofing --to sip:111@192.168.1.128:58386 --spoof-name Spoofed!\r\n"
 	usage += "\t *** Spoofs Caller ID from message provided in file: ***\r\n"
 	usage += "\t python %prog --sipot-mode spoofing --to sip:111@192.168.1.128:58386 --spoof-msg-file examples/example_sipot_spoof_this.txt \r\n"
+	usage += "\t *** Spoofs BYE msg and spoof BYE from 200 OK: ***\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --spoof spfBYE --to sip:108@192.168.56.101:5060 --spoof-msg-file examples/example_sipot_spoof_bye.txt (Needs dialogID to be manually set)\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --spoof spfBYE --to sip:108@192.168.56.101:5060 --spoof-msg-file examples/example_sipot_spoof_bye_from_200.txt \r\n"
+	usage += "\t *** Spoofs CANCEL msg and spoof CANCEL from 180 Ringing: ***\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --spoof spfCANCEL --to sip:108@192.168.1.77:5060 --spoof-msg-file examples/example_sipot_spoof_cancel.txt (Needs dialogID to be manually set)\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --spoof spfCANCEL --to sip:108@192.168.1.77:5060 --spoof-msg-file examples/example_sipot_spoof_cancel_from_180.txt \r\n"
+	usage += "\t *** Automatic spoofing BYE/CANCEL when 200 OK/180 RINGING is detected: ***\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --spoof-auto --spoof spfBYE \r\n"
+	usage += "\t python %prog --sipot-mode spoofing --spoof-auto --spoof spfCANCEL \r\n"
 	usage += "\r\n"
 	
 	parser = OptionParser(usage,version="%prog v"+str(__version__)+__GPL__)
@@ -129,6 +138,7 @@ if __name__ == '__main__':
 	group6 = OptionGroup(parser, 'Spoofing Mode', 'use this options to set spoof parameters')
 	group6.add_option('',   '--spoof', dest='spoof_mode', default='spfINVITE', help='Set the method to spoof. Default is INVITE.')
 	group6.add_option('', 	'--spoof-auto', default=False, action='store_true', dest='spoof_auto', help='Automatically spoofs messages when messages are sniffed.')
+	group6.add_option('', 	'--spoof-auto-target', default='AB', dest='auto_spoof_target', help='Select wich target to spoof: AB: Both sides (default). A:Only side A. B: Only side B.')
 	group6.add_option('-L', '--spoof-list', default=False, action='store_true', dest='list_spoof', help='Display a list of available spoof modes.')
 	group6.add_option('',   '--spoof-name', dest='spoof_name', default=None, help='Set the name to spoof.')
 	group6.add_option('',   '--spoof-contact', dest='spoof_contact', default=None, help='Set the contact header to spoof. ie. sip:666@192.168.1.129:5060.')
@@ -240,6 +250,10 @@ if __name__ == '__main__':
 	# Validate Spoofing options
 	if options.spoof_mode not in ['spfINVITE','spfBYE','spfCANCEL']:
 		print "<"+options.spoof_mode+"> is not an available spoofing mode. Please check -L."
+		sys.exit(-1)
+	options.auto_spoof_target = options.auto_spoof_target.upper()
+	if options.auto_spoof_target not in ['AB','A','B']:
+		print "<"+options.auto_spoof_target+"> is not an available target: Options: AB/A/B."
 		sys.exit(-1)
 
 class bcolors:

