@@ -193,8 +193,69 @@ Fuzz and print results to a file:
 
 
 ### Spoofing ###
-_**Estado:** No desarrollado aún._
+_**Estado:** Completo (en verificación)._
 
+#### Descripción ####
+
+> [Spoofing](http://en.wikipedia.org/wiki/Spoofing_attack) — en términos de seguridad de redes hace referencia al uso de técnicas de suplantación de identidad generalmente con usos maliciosos o de investigación.  Se pueden clasificar los ataques de spoofing, en función de la tecnología utilizada. Entre ellos tenemos el IP spoofing (quizás el más conocido), ARP spoofing, DNS spoofing, etc.
+
+Este módulo se encarga del envío de mensajes SIP a la dirección destino con el objetivo de realizar suplantaciones de identidad. Este módulo posee (3) modos de funcionamiento que pueden ser seleccionados utilizando la opciòn `--spoof` los cuales corresponden a las tres formas más comunes de suplantación de identidad en SIP que son:
+*   `--spoof spfINVITE` _(default)_: Este modo de spoofing utiliza mensajes INVITE para realizar suplantaciones de identidad. El objetivo más común de este ataque es realizar llamadas con un identificador falso que se muestre en la pantalla del objetivo.
+*   `--spoof spfBYE`: Este modo de spoofing utiliza mensajes BYE para realizar suplantaciones de identidad. El objetivo más común de este ataque es finalizar llamadas que ya han sido correctamente establecidas.
+*   `--spoof spfCANCEL`: Este modo de spoofing utiliza mensajes CANCEL para realizar suplantaciones de identidad. El objetivo más común de este ataque es finalizar llamadas que no han sido establecidas aùn (180 RINGING).
+
+##### Auto spoofing #####
+Los últimos dos modos, permiten además la realización de ataques automáticos a partir de escuchar los mensajes que circulan en la red y detectar los momentos para interceptar y finalizar llamadas. El modo de spoofing automático se activa con la opción `--spoof-auto`.
+
+
+#### Opciones ####
+    --spoof=SPOOF_MODE  Set the method to spoof. Default is INVITE.
+    --spoof-auto        Automatically spoofs messages when messages are
+                        sniffed.
+    --spoof-auto-target=AUTO_SPOOF_TARGET
+                        Select wich target to spoof: AB: Both sides (default).
+                        A:Only side A. B: Only side B.
+    -L, --spoof-list    Display a list of available spoof modes.
+    --spoof-name=SPOOF_NAME
+                        Set the name to spoof.
+    --spoof-contact=SPOOF_CONTACT
+                        Set the contact header to spoof. ie.
+                        sip:666@192.168.1.129:5060.
+    --spoof-msg-file=SPOOF_MSG_FILE
+                        Spoof message from file.
+    --spoof-lTag=SPOOF_LOCAL_TAG
+                        Local tag to use in spoof message. ie: as5c9c6524
+    --spoof-rTag=SPOOF_REMOTE_TAG
+                        Remote tag to use in spoof message. ie:
+                        1605a146-d627-e411-8066-0800273bf55a
+    --spoof-callID=SPOOF_CALLID
+                        Call-ID to use in spoof message. ie:
+                        27679bab736046f14798e8b5593222f3@192.168.56.77:5060
+
+#### Ejemplos ####
+
+Spoofs Caller ID:
+
+`python sipot.py --sipot-mode spoofing --to sip:111@192.168.1.128:58386 --spoof-name Spoofed!`
+
+Spoofs Caller ID from message provided in file:
+
+`python sipot.py --sipot-mode spoofing --to sip:111@192.168.1.128:58386 --spoof-msg-file examples/example_sipot_spoof_this.txt`
+
+Spoofs BYE msg and spoof BYE from 200 OK:
+
+`python sipot.py --sipot-mode spoofing --spoof spfBYE --to sip:108@192.168.56.101:5060 --spoof-msg-file examples/example_sipot_spoof_bye.txt` (Needs dialogID to be manually set)
+`python sipot.py --sipot-mode spoofing --spoof spfBYE --to sip:108@192.168.56.101:5060 --spoof-msg-file examples/example_sipot_spoof_bye_from_200.txt` 
+
+Spoofs CANCEL msg and spoof CANCEL from 180 Ringing:
+
+`python sipot.py --sipot-mode spoofing --spoof spfCANCEL --to sip:108@192.168.1.77:5060 --spoof-msg-file examples/example_sipot_spoof_cancel.txt` (Needs dialogID to be manually set)
+`python sipot.py --sipot-mode spoofing --spoof spfCANCEL --to sip:108@192.168.1.77:5060 --spoof-msg-file examples/example_sipot_spoof_cancel_from_180.txt`
+
+Automatic spoofing BYE/CANCEL when 200 OK/180 RINGING is detected:
+
+`python sipot.py --sipot-mode spoofing --spoof-auto --spoof spfBYE`
+`python sipot.py --sipot-mode spoofing --spoof-auto --spoof spfCANCEL`
 
 
 

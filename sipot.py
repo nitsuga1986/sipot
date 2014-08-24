@@ -196,6 +196,7 @@ if __name__ == '__main__':
 	Available SPOOF MODES (select what to spoof):
 	> spfINVITE (default): this mode spoofs INVITE messages. The destiny Caller ID will show the specified --spoof-name.
 	> spfBYE: this mode spoofs BYE messages. It allows to finish established calls.
+	> spfCANCEL: this mode spoofs CANCEL messages. It allows to finish not established calls (RINGING).
 ------------------------------------------------------------------------------------------------
 		"""
 		print list_fuzzers
