@@ -104,6 +104,13 @@ Todas las dependencias han sido embebidas dentro del paquete. Pueden encontrarse
 *   **Licencia:** GNU GPL v2.
 *   **Uso:** Para generar los mensajes y mutarlos en el modo fuzzing.
 
+#### Scapy ####
+> "_Scapy is a powerful interactive packet manipulation program._"
+
+*   **Link:** [Scapy](http://www.secdev.org/projects/scapy/).
+*   **Licencia:** GNU GPL v2+.
+*   **Uso:** Para realizar sniffing the la red en busca de paquetes para el modo de spoofing automático.
+
 ## Módulos: ##
 La presente herramienta consta de (3) módulos principales, con sus diferentes opciones, para explotar tres de los ataques más comunes realizados a servidores SIP:
 
