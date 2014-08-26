@@ -25,7 +25,9 @@ import os, sys, traceback, socket, multitask, random, logging, signal
 
 try:
 	sys.path.append(''.join([os.getcwd(), '/lib/39peers/std']))
-	import rfc3261, rfc2396, rfc3550, rfc4566, kutil, rfc3489bis
+	import rfc3261, rfc3550, rfc4566, kutil, rfc3489bis
+	sys.path.append(''.join([os.getcwd(), '/lib/IPv6_fixes']))
+	import rfc2396_IPv6
 	sys.path.append(''.join([os.getcwd(), '/lib/39peers/external']))
 	import log
 	
@@ -219,17 +221,17 @@ if __name__ == '__main__':
 		if not options.to:
 			if not options.uri:
 				options.registrar_ip = options.registrar_ip if options.registrar_ip else options.domain
-				options.to = rfc2396.Address(str('<sip:'+options.username+'@'+options.registrar_ip+'>'))
+				options.to = rfc2396_IPv6.Address(str('<sip:'+options.username+'@'+options.registrar_ip+'>'))
 				options.uri = options.to.uri.dup()
 				options.to.uri.port = options.uri.port = options.port
 			else:
-				options.uri = rfc2396.URI(options.uri) if options.uri else rfc2396.URI(str('sip:'+options.username+'@'+options.registrar_ip))
-				options.to = rfc2396.Address(str(options.uri))
+				options.uri = rfc2396_IPv6.URI(options.uri) if options.uri else rfc2396_IPv6.URI(str('sip:'+options.username+'@'+options.registrar_ip))
+				options.to = rfc2396_IPv6.Address(str(options.uri))
 				options.registrar_ip = options.registrar_ip if options.registrar_ip else options.to.uri.host
 				options.to.uri.port = options.uri.port = options.port
 		else:
-			options.to = rfc2396.Address(options.to)
-			options.uri = rfc2396.URI(options.uri) if options.uri else options.to.uri.dup()
+			options.to = rfc2396_IPv6.Address(options.to)
+			options.uri = rfc2396_IPv6.URI(options.uri) if options.uri else options.to.uri.dup()
 			options.registrar_ip = options.registrar_ip if options.registrar_ip else options.to.uri.host
 			options.port = options.to.uri.port if options.to.uri.port else options.port
 			options.to.uri.port = options.uri.port = options.port
@@ -237,10 +239,10 @@ if __name__ == '__main__':
 	if not options.fromAddr:
 		options.username = options.username if options.username else (options.reg_username if options.reg_username else options.to.uri.user)
 		options.reg_username = options.reg_username if options.reg_username else options.username
-		options.fromAddr = rfc2396.Address(str('<sip:'+options.username+'@'+options.registrar_ip+'>'))
+		options.fromAddr = rfc2396_IPv6.Address(str('<sip:'+options.username+'@'+options.registrar_ip+'>'))
 		options.fromAddr.uri.port = options.port
 	else:
-		options.fromAddr = rfc2396.Address(options.fromAddr)
+		options.fromAddr = rfc2396_IPv6.Address(options.fromAddr)
 		options.username = options.username if options.username else options.fromAddr.displayable
 		options.reg_username = options.reg_username if options.reg_username else options.fromAddr.displayable
 		options.fromAddr.uri.port = options.port
@@ -289,7 +291,7 @@ class User(object):
 		self.username = app.options.username
 		self.reg_username = app.options.reg_username
 		self.password = app.options.password 
-		self.registrarAddr = rfc2396.Address(str('<sip:'+self.reg_username+'@'+app.options.registrar_ip+'>'))
+		self.registrarAddr = rfc2396_IPv6.Address(str('<sip:'+self.reg_username+'@'+app.options.registrar_ip+'>'))
 		# Generators
 		self._listenerGen = self._registerGen = None
 		# create a SIP stack instance

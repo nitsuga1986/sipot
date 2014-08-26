@@ -5,7 +5,9 @@ from sipot import App, User, logger
 
 # 39peers
 sys.path.append(''.join([os.getcwd(), '/lib/39peers/std']))
-import rfc3261, rfc2396
+import rfc3261
+sys.path.append(''.join([os.getcwd(), '/lib/IPv6_fixes']))
+import rfc2396_IPv6
 # Others: [multitask, helper_functions]
 sys.path.append(''.join([os.getcwd(), '/lib/']))
 
@@ -97,7 +99,7 @@ class flooderUser(User):
 					yield (message_generated)
 		# Dest Address
 		addr = self.remoteTarget.uri
-		if addr and isinstance(addr, rfc2396.URI):
+		if addr and isinstance(addr, rfc2396_IPv6.URI):
 			if not addr.host: raise ValueError, 'No host in destination uri'
 			addr = (addr.host, addr.port or self.transport.type == 'tls' and self.transport.secure and 5061 or 5060)
 		# Msg generator
@@ -145,7 +147,6 @@ class flooderUser(User):
 				else:
 					logger.debug('invalid socket type', self.sock.type)
 		except AttributeError: pass
-		
 
 class FloodingApp(App):
 	def __init__(self, options):
