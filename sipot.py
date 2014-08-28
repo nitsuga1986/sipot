@@ -25,9 +25,9 @@ import os, sys, traceback, socket, multitask, random, logging, signal
 
 try:
 	sys.path.append(''.join([os.getcwd(), '/lib/39peers/std']))
-	import rfc3261, rfc3550, rfc4566, kutil, rfc3489bis
+	import rfc3550, rfc4566, rfc3489bis, kutil
 	sys.path.append(''.join([os.getcwd(), '/lib/IPv6_fixes']))
-	import rfc2396_IPv6
+	import rfc3261_IPv6, rfc2396_IPv6
 	sys.path.append(''.join([os.getcwd(), '/lib/39peers/external']))
 	import log
 	
@@ -93,6 +93,7 @@ if __name__ == '__main__':
 	group1 = OptionGroup(parser, 'Network', 'Use these options for network configuration')
 	group1.add_option('',   '--transport', dest='transport', default='udp', help='the transport type is one of "udp", "tcp" or "tls". Default is "udp"')
 	group1.add_option('',   '--int-ip',  dest='int_ip',  default='0.0.0.0', help='listening IP address for SIP and RTP. Use this option only if you wish to select one out of multiple IP interfaces. Default "0.0.0.0"')
+	group1.add_option('',   '--int-ipv6',  dest='int_ipv6',  default='::1', help='listening IPv6 address for SIP and RTP. Use this option only if you wish to select one out of multiple IP interfaces. Default "0.0.0.0"')
 	group1.add_option('',   '--port',    dest='port',    default=5062, type="int", help='listening port number for SIP UDP/TCP. TLS is one more than this. Default is 5092')
 	group1.add_option('',   '--fix-nat', dest='fix_nat', default=False, action='store_true', help='enable fixing NAT IP address in Contact')
 	group1.add_option('',   '--max-size',dest='max_size', default=4096, type='int', help='size of received socket data. Default is 4096')
@@ -169,8 +170,8 @@ if __name__ == '__main__':
 	#-------------------- General options---------------------------------
 	logger.setLevel((options.verbose or options.verbose_all) and logging.DEBUG or logging.INFO)
 	if options.verbose_all:
-		if hasattr(rfc3261, 'logger'): rfc3261.logger.setLevel(logging.DEBUG)
-		else: rfc3261._debug = True
+		if hasattr(rfc3261_IPv6, 'logger'): rfc3261_IPv6.logger.setLevel(logging.DEBUG)
+		else: rfc3261_IPv6._debug = True
 		
 	if options.list_fuzzers:
 		list_fuzzers = """
@@ -221,11 +222,11 @@ if __name__ == '__main__':
 		if not options.to:
 			if not options.uri:
 				options.registrar_ip = options.registrar_ip if options.registrar_ip else options.domain
-				options.to = rfc2396_IPv6.Address(str('<sip:'+options.username+'@'+options.registrar_ip+'>'))
+				options.to = rfc2396_IPv6.Address(str('<sip:'+options.username+'@'+(options.registrar_ip if rfc2396_IPv6.isIPv4(options.registrar_ip) else ('['+options.registrar_ip+']'))+'>'))
 				options.uri = options.to.uri.dup()
 				options.to.uri.port = options.uri.port = options.port
 			else:
-				options.uri = rfc2396_IPv6.URI(options.uri) if options.uri else rfc2396_IPv6.URI(str('sip:'+options.username+'@'+options.registrar_ip))
+				options.uri = rfc2396_IPv6.URI(options.uri) if options.uri else rfc2396_IPv6.URI(str('sip:'+options.username+'@'+(options.registrar_ip if rfc2396_IPv6.isIPv4(options.registrar_ip) else ('['+options.registrar_ip+']'))))
 				options.to = rfc2396_IPv6.Address(str(options.uri))
 				options.registrar_ip = options.registrar_ip if options.registrar_ip else options.to.uri.host
 				options.to.uri.port = options.uri.port = options.port
@@ -239,7 +240,7 @@ if __name__ == '__main__':
 	if not options.fromAddr:
 		options.username = options.username if options.username else (options.reg_username if options.reg_username else options.to.uri.user)
 		options.reg_username = options.reg_username if options.reg_username else options.username
-		options.fromAddr = rfc2396_IPv6.Address(str('<sip:'+options.username+'@'+options.registrar_ip+'>'))
+		options.fromAddr = rfc2396_IPv6.Address(str('<sip:'+options.username+'@'+(options.registrar_ip if rfc2396_IPv6.isIPv4(options.registrar_ip) else ('['+options.registrar_ip+']'))+'>'))
 		options.fromAddr.uri.port = options.port
 	else:
 		options.fromAddr = rfc2396_IPv6.Address(options.fromAddr)
@@ -277,10 +278,19 @@ class User(object):
 		self.register = None
 		self.reg_result = self.reg_reason = None
 		# socket setup
-		sock = socket.socket(type=socket.SOCK_DGRAM if app.options.transport == self.UDP else socket.SOCK_STREAM)
-		sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		sock.bind((app.options.int_ip, (app.options.port+1) if app.options.transport == self.TLS else app.options.port))
-		self.sock, self.sockaddr, self.nat = sock, kutil.getlocaladdr(sock), app.options.fix_nat
+		if rfc2396_IPv6.isIPv6(app.options.to.uri.host): # Unstable
+			print "You are using IPv6 unstable feature."
+			print "IPv6 data:"
+			print "Bind to: "+str((app.options.int_ipv6, (app.options.port+1) if app.options.transport == self.TLS else app.options.port))
+			sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+			sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+			sock.bind((app.options.int_ipv6, (app.options.port+1) if app.options.transport == self.TLS else app.options.port))
+			self.sock, self.nat = sock, app.options.fix_nat
+		else:
+			sock = socket.socket(type=socket.SOCK_DGRAM if app.options.transport == self.UDP else socket.SOCK_STREAM)
+			sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+			sock.bind((app.options.int_ip, (app.options.port+1) if app.options.transport == self.TLS else app.options.port))
+			self.sock, self.nat = sock, app.options.fix_nat
 		# socket options
 		self.max_size = app.options.max_size
 		self.interval = app.options.interval
@@ -291,13 +301,12 @@ class User(object):
 		self.username = app.options.username
 		self.reg_username = app.options.reg_username
 		self.password = app.options.password 
-		self.registrarAddr = rfc2396_IPv6.Address(str('<sip:'+self.reg_username+'@'+app.options.registrar_ip+'>'))
+		self.registrarAddr = rfc2396_IPv6.Address(str('<sip:'+self.reg_username+'@'+(app.options.registrar_ip if rfc2396_IPv6.isIPv4(app.options.registrar_ip) else ('['+app.options.registrar_ip+']'))+'>'))
 		# Generators
 		self._listenerGen = self._registerGen = None
 		# create a SIP stack instance
-		self.transport = rfc3261.TransportInfo(self.sock, secure=(app.options.transport == self.TLS))
-		self._stack = rfc3261.Stack(self, self.transport, fix_nat=app.options.fix_nat)
-		logger.debug('User created on listening='+str(sock.getsockname())+'advertised='+str(self.sockaddr))
+		self.transport = rfc3261_IPv6.TransportInfo(self.sock, secure=(app.options.transport == self.TLS))
+		self._stack = rfc3261_IPv6.Stack(self, self.transport, fix_nat=app.options.fix_nat)
 		# create a SIP stack instance
 		self.localParty = app.options.fromAddr.dup()
 		self.remoteParty = app.options.to.dup()
@@ -332,9 +341,9 @@ class User(object):
 		'''Create a REGISTER Message and populate the Expires and Contact headers. It assumes
 		that self.reg is valid.'''
 		m = self._ua.createRegister(self._ua.localParty)
-		m.Contact = rfc3261.Header(str(self._stack.uri), 'Contact')
+		m.Contact = rfc3261_IPv6.Header(str(self._stack.uri), 'Contact')
 		m.Contact.value.uri.user = self.localParty.uri.user
-		m.Expires = rfc3261.Header(str(self.app.options.register_interval), 'Expires')
+		m.Expires = rfc3261_IPv6.Header(str(self.app.options.register_interval), 'Expires')
 		return m
 	#-------------------- Generators ---------------------------------
 	def _listener(self):
@@ -388,13 +397,13 @@ class User(object):
 	def createServer(self, request, uri, stack): 
 		'''Create a UAS if the method is acceptable. If yes, it also adds additional attributes
 		queue and gen in the UAS.'''
-		ua = request.method in ['INVITE', 'BYE', 'ACK', 'SUBSCRIBE', 'MESSAGE', 'NOTIFY'] and rfc3261.UserAgent(self.stack, request) or None
+		ua = request.method in ['INVITE', 'BYE', 'ACK', 'SUBSCRIBE', 'MESSAGE', 'NOTIFY'] and rfc3261_IPv6.UserAgent(self.stack, request) or None
 		if ua: ua.queue = ua.gen = None
 		logger.debug('createServer', ua)
 		return ua
 	def createClient(self):
 		'''Create a UAC and add additional attributes: queue and gen.'''
-		self._ua = rfc3261.UserAgent(self._stack)
+		self._ua = rfc3261_IPv6.UserAgent(self._stack)
 		self._ua.autoack = False
 		self._ua.scheme = self._stack.transport.secure and 'sips' or 'sip' 
 		self._ua.localParty, self._ua.remoteParty, self._ua.remoteTarget = self.localParty.dup(), self.remoteParty.dup(), self.remoteTarget.dup()
@@ -432,7 +441,7 @@ class User(object):
 				else:
 					ua.sendResponse(405, 'Method not allowed')
 			elif request.method == 'CANCEL':   
-				# TODO: non-dialog CANCEL comes here. need to fix rfc3261 so that it goes to cancelled() callback.
+				# TODO: non-dialog CANCEL comes here. need to fix rfc3261_IPv6 so that it goes to cancelled() callback.
 				if ua.request.method == 'INVITE': # only INVITE is allowed to be cancelled.
 					yield self._queue.put(('close', (str(request.From.value), ua)))
 			else:
@@ -468,7 +477,7 @@ class User(object):
 	def createTimer(self, app, stack):
 		'''Callback to create a timer object.'''
 		return kutil.Timer(app)
-	# rfc3261.Transport related methods
+	# rfc3261_IPv6.Transport related methods
 	def send(self, data, addr, stack):
 		'''Send data to the remote addr.'''
 		def _send(self, data, addr): # generator version

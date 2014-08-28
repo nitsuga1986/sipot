@@ -274,7 +274,7 @@ class spooferUser(User):
 			sock = socket.socket(type=socket.SOCK_DGRAM if self.app.options.transport == self.UDP else socket.SOCK_STREAM)
 			sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 			sock.bind((self.app.options.int_ip, (self.app.options.port+1) if self.app.options.transport == self.TLS else self.app.options.port))
-			self.sock, self.sockaddr, self.nat = sock, kutil.getlocaladdr(sock), self.app.options.fix_nat
+			self.sock, self.nat = sock, self.app.options.fix_nat
 			#------------------------------------------------------------
 			try:
 				logger.debug('sending[%d] to %s\n%s'%(len(data), addr, data))

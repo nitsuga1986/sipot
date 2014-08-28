@@ -4,10 +4,8 @@ import sys, os, socket, multitask, random
 from sipot import App, User, logger
 
 # 39peers
-sys.path.append(''.join([os.getcwd(), '/lib/39peers/std']))
-import rfc3261
 sys.path.append(''.join([os.getcwd(), '/lib/IPv6_fixes']))
-import rfc2396_IPv6
+import rfc2396_IPv6, rfc3261_IPv6
 # Others: [multitask, helper_functions]
 sys.path.append(''.join([os.getcwd(), '/lib/']))
 
@@ -61,7 +59,7 @@ class flooderUser(User):
 			if self.flood_msg_file:
 				with open (self.flood_msg_file, "r") as file_txt:
 					file_txt=file_txt.read()
-				m = rfc3261.Message()
+				m = rfc3261_IPv6.Message()
 				try:
 					if self.flood_noparse:
 						m = file_txt
@@ -70,9 +68,9 @@ class flooderUser(User):
 				except ValueError, E: pass # TODO: send 400 response to non-ACK request
 			else:
 				m = self._ua.createRequest(self.flood_method)
-				m.Contact = rfc3261.Header(str(self._stack.uri), 'Contact')
+				m.Contact = rfc3261_IPv6.Header(str(self._stack.uri), 'Contact')
 				m.Contact.value.uri.user = self.localParty.uri.user
-				m.Expires = rfc3261.Header(str(self.app.options.register_interval), 'Expires')
+				m.Expires = rfc3261_IPv6.Header(str(self.app.options.register_interval), 'Expires')
 			return m
 		def _createFloodMsgGen(message_generated):
 			if self.app.options.modify_extentions and not self.flood_noparse:
@@ -92,7 +90,7 @@ class flooderUser(User):
 					extension = self.ExtensionsGenerator.next()
 					message_generated.From.value.uri.user = message_generated.From.value.displayName =  message_generated.To.value.uri.user = message_generated.To.value.displayName = extension
 					message_generated.From.tag=str(random.randint(0,2**31))
-					message_generated['Call-ID'] = rfc3261.Header(str(random.randint(0,2**31)) + '@' + (message_generated.From.value.uri.host or 'localhost'), 'Call-ID')
+					message_generated['Call-ID'] = rfc3261_IPv6.Header(str(random.randint(0,2**31)) + '@' + (message_generated.From.value.uri.host or 'localhost'), 'Call-ID')
 					yield (message_generated)
 			else:
 				while True:
