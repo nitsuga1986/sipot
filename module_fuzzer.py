@@ -1,4 +1,26 @@
 # Fuzzing App
+__GPL__ = """
+
+   Sipvicious extension line scanner scans SIP PaBXs for valid extension lines
+   Copyright (C) 2012 Sandro Gauci <sandro@enablesecurity.com>
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+__author__ = "Nitsuga"
+__version__ = 'alpha'
+__prog__ = 'sipot: fuzzer module'
+__desc__ = "SIP Open Tester"
 #===================================================================================================================
 #------------------------------IMPORT------------------------------
 try:
@@ -31,6 +53,20 @@ def module_Options(parser):
 	parser.add_option_group(group_fuzzer)     
 	return parser
 #===================================================================================================================
+def module_Usage(usage):
+	usage += "Fuzzing mode:\r\n"
+	usage += "\t *** Fuzzes the headers commonly found in a SIP INVITE request a IPv6 address: ***\r\n"
+	usage += "\t python %prog --sipot-mode fuzzing --to sip:6000@[fd11:5001:ccc3:d9ab:0:0:0:3]:5060 \r\n"
+	usage += "\t *** Fuzzes the headers commonly found in a SIP REGISTER request to 192.168.56.77: ***\r\n"
+	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer REGISTERFuzzer --to sip:109@192.168.56.77:5060 \r\n"
+	usage += "\t *** Uses all available fuzzers to 192.168.56.77: ***\r\n"
+	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer --fuzz-max 10 All --to sip:109@192.168.56.77:5060 \r\n"
+	usage += "\t *** Print results to a file: ***\r\n"
+	usage += "\t python %prog --sipot-mode fuzzing --fuzz-crash --fuzz-to-file examples/example_fuzz_results.txt --to sip:109@192.168.56.77:5060 \r\n"
+	usage += "\t *** Print results to a file: ***\r\n"
+	usage += "\t python %prog --sipot-mode fuzzing --fuzz-crash --fuzz-to-file examples/example_fuzz_results.txt --fuzz-audit examples/example_fuzz_audit.txt --to sip:109@192.168.56.77:5060 \r\n"
+	usage += "\r\n"
+	return usage
 class fuzzerUser(User):
 	'''The User object provides a layer between the application and the SIP stack.'''
 	# self.state  				//  user state

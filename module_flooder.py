@@ -1,4 +1,26 @@
 # Flooding App
+__GPL__ = """
+
+   Sipvicious extension line scanner scans SIP PaBXs for valid extension lines
+   Copyright (C) 2012 Sandro Gauci <sandro@enablesecurity.com>
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+__author__ = "Nitsuga"
+__version__ = 'alpha'
+__prog__ = 'sipot: flooder module'
+__desc__ = "SIP Open Tester"
 #===================================================================================================================
 #------------------------------IMPORT------------------------------
 try:
@@ -11,6 +33,16 @@ try:
 	sys.path.append(''.join([os.getcwd(), '/lib/']))
 except ImportError: print 'We had a problem importing dependencies.'; traceback.print_exc(); sys.exit(1)
 #===================================================================================================================
+def module_Usage(usage):
+	usage += "Flooding mode:\r\n"
+	usage += "\t *** Flood 500 Msg to 192.168.56.77 to IPv6 address: ***\r\n"
+	usage += "\t python %prog --sipot-mode flooding --to sip:6000@[fd11:5001:ccc3:d9ab:0:0:0:3]:5060 --flood-number 500 \r\n"
+	usage += "\t *** Flood 500 Msg from File to 192.168.56.77: ***\r\n"
+	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --flood-msg-file examples/example_sipot_flood.txt \r\n"
+	usage += "\t *** Flood 500 Msg to 192.168.56.77 changing extentions with dictionary: ***\r\n"
+	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary examples/example_sipot_ext_dict.txt \r\n"
+	usage += "\r\n"
+	return usage
 def module_Options(parser):
 	from optparse import OptionGroup
 	group_flooder = OptionGroup(parser, 'Flooding Mode', 'use this options to set flooding parameters')
@@ -34,6 +66,7 @@ class flooderUser(User):
 		self.start_flood_time = None
 		self.flood_msg_file = app.options.flood_msg_file
 		self.flood_noparse = app.options.flood_noparse
+	
 	def stop(self):
 		if self._listenerGen:
 			self._listenerGen.close()
