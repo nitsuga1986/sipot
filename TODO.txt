@@ -1,9 +1,7 @@
 // APP GRAL =====================================
-* Test TCP in all modes.
+* Test TCP IPv4/IPv6 in all modes.
 // FLOODER ======================================
-* IPv6
 // FUZZER =======================================
-* IPv6
 // SPOOFER ======================================
 * IPv6
 7.2. Spoofing INVITE

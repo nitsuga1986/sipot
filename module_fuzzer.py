@@ -4,8 +4,8 @@ import os, sys, traceback, socket, multitask
 from sipot import App, User, logger, bcolors
 
 # 39peers
-sys.path.append(''.join([os.getcwd(), '/lib/39peers/std']))
-import rfc3261, rfc2396
+sys.path.append(''.join([os.getcwd(), '/lib/IPv6_fixes']))
+import rfc2396_IPv6, rfc3261_IPv6
 # Sulley
 sys.path.append(''.join([os.getcwd(), '/lib/sulley']))
 from sulley import *
@@ -143,7 +143,7 @@ class fuzzerUser(User):
 		if self.listenerOff: self._listenerGen.close()
 		# Dest Address
 		addr = self.remoteTarget.uri
-		if addr and isinstance(addr, rfc2396.URI):
+		if addr and isinstance(addr, rfc2396_IPv6.URI):
 			if not addr.host: raise ValueError, 'No host in destination uri'
 			addr = (addr.host, addr.port or self.transport.type == 'tls' and self.transport.secure and 5061 or 5060)
 		mutable_msg = _createMutableMessage()
@@ -205,7 +205,7 @@ class fuzzerUser(User):
 					if self.state != self.FUZZING and self.state != self.FUZZING_COMPETED:
 						self._stack.received(data, remote)
 					else:
-						m = rfc3261.Message()
+						m = rfc3261_IPv6.Message()
 						try:
 							if self.crash_fuzz==self.WAIT_CRSH_CHK and self.crash_porbe==self.CRASH_PROBE_REC:
 								# If response to fuzz is received
@@ -260,7 +260,7 @@ class fuzzerUser(User):
 								WaitingResponse = False
 							yield
 						# Fuzz response received => send probe
-						self.request_porbe.CSeq = rfc3261.Header(str(self.request_porbe.CSeq.number+1) + ' ' + self.request_porbe.CSeq.method, 'CSeq')
+						self.request_porbe.CSeq = rfc3261_IPv6.Header(str(self.request_porbe.CSeq.number+1) + ' ' + self.request_porbe.CSeq.method, 'CSeq')
 						self._ua.sendRequest(self.request_porbe)
 						#print '3. Probe sent'
 						self.crash_porbe = self.CRASH_PROBE_SENT

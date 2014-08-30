@@ -91,13 +91,13 @@ class URI(object):
  
     # regular expression for URI syntax.
     # TODO: need to extend for host portion.
-    # (?P<scheme>\w+):(?:(?P<user>[\w\.]+):?(?P<password>[\w\.]+)?@)?\[?(?P<host>(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})|(?:(?:[0-9a-fA-F]{0,4}):){1,7}[0-9a-fA-F]{1,4}|(?:(?:[0-9A-Za-z]+\.)+[0-9A-Za-z]+))\]?:?(?P<port>\d{1,6})?(?:\;(?P<params>[^\?]*))?(?:\?(?P<headers>.*))?
+    # (?P<scheme>\w+):(?:(?P<user>[\w\.]+):?(?P<password>[\w\.]+)?@)?\[?(?P<host>(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})|(?:(?:[0-9a-fA-F]{0,4}):){1,7}[0-9a-fA-F]{0,4}|(?:(?:[0-9A-Za-z]+\.)+[0-9A-Za-z]+))\]?:?(?P<port>\d{1,6})?(?:\;(?P<params>[^\?]*))?(?:\?(?P<headers>.*))?
     _syntax = re.compile(
                         '(?P<scheme>\w+):' #Scheme
                         +'(?:(?P<user>[\w\.]+):?(?P<password>[\w\.]+)?@)?' #User:Password
                         +'\[?(?P<host>' #Begin group host
                             +'(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})|' #IPv4 address Host Or
-                            +'(?:(?:[0-9a-fA-F]{0,4}):){1,7}[0-9a-fA-F]{1,4}|' #IPv6 address Host Or
+                            +'(?:(?:[0-9a-fA-F]{0,4}):){1,7}[0-9a-fA-F]{0,4}|' #IPv6 address Host Or
                             +'(?:(?:[0-9A-Za-z]+\.)+[0-9A-Za-z]+)'#Hostname string
                         +')\]?:?' #End group host
                         +'(?P<port>\d{1,6})?' #port

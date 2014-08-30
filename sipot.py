@@ -48,8 +48,8 @@ if __name__ == '__main__':
 	usage += "\r\n"
 	
 	usage += "Flooding mode:\r\n"
-	usage += "\t *** Flood 500 Msg to 192.168.56.77: ***\r\n"
-	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 \r\n"
+	usage += "\t *** Flood 500 Msg to 192.168.56.77 to IPv6 address: ***\r\n"
+	usage += "\t python %prog --sipot-mode flooding --to sip:6000@[fd11:5001:ccc3:d9ab:0:0:0:3]:5060 --flood-number 500 \r\n"
 	usage += "\t *** Flood 500 Msg from File to 192.168.56.77: ***\r\n"
 	usage += "\t python %prog --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --flood-msg-file examples/example_sipot_flood.txt \r\n"
 	usage += "\t *** Flood 500 Msg to 192.168.56.77 changing extentions with dictionary: ***\r\n"
