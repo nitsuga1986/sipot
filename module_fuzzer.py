@@ -1,4 +1,5 @@
 # Fuzzing App
+#===================================================================================================================
 __GPL__ = """
 
    Sipvicious extension line scanner scans SIP PaBXs for valid extension lines
@@ -39,20 +40,6 @@ try:
 	from helper_functions import bcolors
 except ImportError: print 'We had a problem importing dependencies.'; traceback.print_exc(); sys.exit(1)
 #===================================================================================================================
-def module_Options(parser):
-	from optparse import OptionGroup
-	group_fuzzer = OptionGroup(parser, 'Fuzzing Mode', 'use this options to set fuzzing parameters')
-	group_fuzzer.add_option('-l', '--fuzz-fuzzer-list', default=False, action='store_true', dest='list_fuzzers', help='Display a list of available fuzzers')
-	group_fuzzer.add_option('',   '--fuzz-fuzzer', dest='fuzzer', default='InviteCommonFuzzer', help='Set fuzzer. Default is InviteCommonFuzzer. Use -l to see a list of all available fuzzers')
-	group_fuzzer.add_option('',   '--fuzz-crash', default=False, action='store_true', dest='crash_detect', help='Enables crash detection')
-	group_fuzzer.add_option('',   '--fuzz-crash-method', dest='crash_method', default='OPTIONS', help='Set crash method. By default uses OPTIONS message and stores response.')
-	group_fuzzer.add_option('',   '--fuzz-crash-no-stop', default=False, action='store_true', dest='no_stop_at_crash', help='If selected prevents the app to be stoped when a crash is detected.')
-	group_fuzzer.add_option('',   '--fuzz-max', dest='fuzz_max_msgs', default=99999, type="int", help='Sets the maximum number of messages to be sent by fuzzing mode. Default is max available in fuzzer.')
-	group_fuzzer.add_option('',   '--fuzz-to-file', dest='file_name', default=None, help='Print the output to a file with the given name.')
-	group_fuzzer.add_option('',   '--fuzz-audit', dest='audit_file_name', default=None, help='Enables fuzzing audit. All messages sent (fuzzing) will be saved into the given file name.')
-	parser.add_option_group(group_fuzzer)     
-	return parser
-#===================================================================================================================
 def module_Usage(usage):
 	usage += "Fuzzing mode:\r\n"
 	usage += "\t *** Fuzzes the headers commonly found in a SIP INVITE request a IPv6 address: ***\r\n"
@@ -67,6 +54,20 @@ def module_Usage(usage):
 	usage += "\t python %prog --sipot-mode fuzzing --fuzz-crash --fuzz-to-file examples/example_fuzz_results.txt --fuzz-audit examples/example_fuzz_audit.txt --to sip:109@192.168.56.77:5060 \r\n"
 	usage += "\r\n"
 	return usage
+def module_Options(parser):
+	from optparse import OptionGroup
+	group_fuzzer = OptionGroup(parser, 'Fuzzing Mode', 'use this options to set fuzzing parameters')
+	group_fuzzer.add_option('-l', '--fuzz-fuzzer-list', default=False, action='store_true', dest='list_fuzzers', help='Display a list of available fuzzers')
+	group_fuzzer.add_option('',   '--fuzz-fuzzer', dest='fuzzer', default='InviteCommonFuzzer', help='Set fuzzer. Default is InviteCommonFuzzer. Use -l to see a list of all available fuzzers')
+	group_fuzzer.add_option('',   '--fuzz-crash', default=False, action='store_true', dest='crash_detect', help='Enables crash detection')
+	group_fuzzer.add_option('',   '--fuzz-crash-method', dest='crash_method', default='OPTIONS', help='Set crash method. By default uses OPTIONS message and stores response.')
+	group_fuzzer.add_option('',   '--fuzz-crash-no-stop', default=False, action='store_true', dest='no_stop_at_crash', help='If selected prevents the app to be stoped when a crash is detected.')
+	group_fuzzer.add_option('',   '--fuzz-max', dest='fuzz_max_msgs', default=99999, type="int", help='Sets the maximum number of messages to be sent by fuzzing mode. Default is max available in fuzzer.')
+	group_fuzzer.add_option('',   '--fuzz-to-file', dest='file_name', default=None, help='Print the output to a file with the given name.')
+	group_fuzzer.add_option('',   '--fuzz-audit', dest='audit_file_name', default=None, help='Enables fuzzing audit. All messages sent (fuzzing) will be saved into the given file name.')
+	parser.add_option_group(group_fuzzer)     
+	return parser
+#===================================================================================================================
 class fuzzerUser(User):
 	'''The User object provides a layer between the application and the SIP stack.'''
 	# self.state  				//  user state

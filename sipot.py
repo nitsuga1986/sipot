@@ -1,3 +1,5 @@
+# MAIN APP
+#===================================================================================================================
 __GPL__ = """
 
    Sipvicious extension line scanner scans SIP PaBXs for valid extension lines
@@ -34,13 +36,18 @@ try:
 	sys.path.append(''.join([os.getcwd(), '/lib/']))
 	# Signal exit
 	from helper_functions import original_sigint, set_original_sigint, return_original_sigint, bcolors
+	logger = logging.getLogger('app') # debug(), info(), warning(), error() and critical()
 except ImportError: print 'We had a problem importing dependencies.'; traceback.print_exc(); sys.exit(1)
-logger = logging.getLogger('app') # debug(), info(), warning(), error() and critical()
 #===================================================================================================================
 #------------------------------MAIN(1)[Usage+Options]------------------------------
 if __name__ == '__main__': 
 	default_ext_ip, default_domain, default_login = kutil.getlocaladdr()[0], socket.gethostname(), os.getlogin()
 	from optparse import OptionParser, OptionGroup
+	from helper_functions import original_sigint, set_original_sigint, return_original_sigint, bcolors
+	# Import Modules (Usage/Options)
+	from module_flooder import module_Usage as flooder_Usage, module_Options as flooder_Options
+	from module_fuzzer import module_Usage as fuzzer_Usage, module_Options as fuzzer_Options
+	from module_spoofer import module_Usage as spoofer_Usage, module_Options as spoofer_Options
 	# Welcome message
 	print (bcolors.OKGREEN+"==================================================================================================================="+bcolors.ENDC)
 	print (bcolors.OKGREEN+"Welcome to SIPOT test tool."+bcolors.ENDC)
@@ -52,12 +59,9 @@ if __name__ == '__main__':
 	usage += "\tpython %prog --register --username 109 --pwd abc123 --reg-ip 192.168.56.77 \r\n"
 	usage += "\r\n"
 	
-	from  module_flooder import  module_Usage
-	usage = module_Usage(usage)
-	from  module_fuzzer import  module_Usage
-	usage = module_Usage(usage)
-	from  module_spoofer import  module_Usage
-	usage = module_Usage(usage)
+	usage = flooder_Usage(usage)
+	usage = fuzzer_Usage(usage)
+	usage = spoofer_Usage(usage)
 	
 	parser = OptionParser(usage,version="%prog v"+str(__version__)+__GPL__)
 	
@@ -67,9 +71,7 @@ if __name__ == '__main__':
 	group1 = OptionGroup(parser, 'Network', 'Use these options for network configuration')
 	group1.add_option('',   '--transport', dest='transport', default='udp', help='the transport type is one of "udp", "tcp" or "tls". Default is "udp"')
 	group1.add_option('',   '--int-ip',  dest='int_ip',  default='0.0.0.0', help='listening IP address for SIP and RTP. Use this option only if you wish to select one out of multiple IP interfaces. Default "0.0.0.0"')
-	group1.add_option('',   '--int-ipv6',  dest='int_ipv6',  default='::1', help='listening IPv6 address for SIP and RTP. Use this option only if you wish to select one out of multiple IP interfaces. Default "0.0.0.0"')
 	group1.add_option('',   '--port',    dest='port',    default=5062, type="int", help='listening port number for SIP UDP/TCP. TLS is one more than this. Default is 5092')
-	group1.add_option('',   '--fix-nat', dest='fix_nat', default=False, action='store_true', help='enable fixing NAT IP address in Contact')
 	group1.add_option('',   '--max-size',dest='max_size', default=4096, type='int', help='size of received socket data. Default is 4096')
 	group1.add_option('',   '--interval',dest='interval', default=180, type='int', help='The interval argument specifies how often should the sock be checked for close, default is 180 s')
 	parser.add_option_group(group1)
@@ -94,12 +96,9 @@ if __name__ == '__main__':
 	group3.add_option('-M',   '--sipot-mode', dest='sipot_mode', default='default', help='flooding / fuzzing / spoofing. set the mode of attack for SIPOT. Default is flooding.')
 	parser.add_option_group(group3)
     
-	from  module_flooder import  module_Options
-	parser = module_Options(parser)
-	from  module_fuzzer import  module_Options
-	parser = module_Options(parser)
-	from  module_spoofer import  module_Options
-	parser = module_Options(parser)
+	parser = flooder_Options(parser)
+	parser = fuzzer_Options(parser)
+	parser = spoofer_Options(parser)
 	
 	group7 = OptionGroup(parser, 'Generate Extention', 'Extensions options for flooding. Changes the originator extention in each message.')
 	group7.add_option('',   '--no-modify-ext',dest='modify_extentions', default=True, action='store_false', help='If not specified, extentions will be modified in each message flooded. To generate extentions options --ext-dictionary &--ext-range  will be used.')
@@ -220,18 +219,14 @@ class User(object):
 		self.reg_result = self.reg_reason = None
 		# socket setup
 		if rfc2396_IPv6.isIPv6(app.options.to.uri.host): # Unstable
-			print "You are using IPv6 unstable feature."
-			print "IPv6 data:"
-			print "Bind to: "+str((app.options.int_ipv6, (app.options.port+1) if app.options.transport == self.TLS else app.options.port))
-			sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
-			sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-			sock.bind((app.options.int_ipv6, (app.options.port+1) if app.options.transport == self.TLS else app.options.port))
-			self.sock, self.nat = sock, app.options.fix_nat
+			print bcolors.FAIL+"ALERT! You are using IPv6 unstable/not tested feature."+bcolors.ENDC
+			if app.options.int_ip == '0.0.0.0': app.options.int_ip= '::1'
+			sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM if app.options.transport == self.UDP else socket.SOCK_STREAM)
 		else:
 			sock = socket.socket(type=socket.SOCK_DGRAM if app.options.transport == self.UDP else socket.SOCK_STREAM)
-			sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-			sock.bind((app.options.int_ip, (app.options.port+1) if app.options.transport == self.TLS else app.options.port))
-			self.sock, self.nat = sock, app.options.fix_nat
+		sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		sock.bind((app.options.int_ip, (app.options.port+1) if app.options.transport == self.TLS else app.options.port))
+		self.sock = sock
 		# socket options
 		self.max_size = app.options.max_size
 		self.interval = app.options.interval
@@ -247,7 +242,7 @@ class User(object):
 		self._listenerGen = self._registerGen = None
 		# create a SIP stack instance
 		self.transport = rfc3261_IPv6.TransportInfo(self.sock, secure=(app.options.transport == self.TLS))
-		self._stack = rfc3261_IPv6.Stack(self, self.transport, fix_nat=app.options.fix_nat)
+		self._stack = rfc3261_IPv6.Stack(self, self.transport, fix_nat=None)
 		# create a SIP stack instance
 		self.localParty = app.options.fromAddr.dup()
 		self.remoteParty = app.options.to.dup()
@@ -511,19 +506,21 @@ class App(object):
 #------------------------------MAIN(2)[Start App]------------------------------
 if __name__ == '__main__':
     try:
-        print "------------------------------------------------------------------------------------------------------------"
+		# Import Modules (App)
+        from module_flooder import FloodingApp
+        from module_fuzzer import FuzzingApp
+        from module_spoofer import SpoofingApp
+		# Select Module
         if options.sipot_mode == 'flooding':
-			import module_flooder
-			app = module_flooder.FloodingApp(options)
+			app = FloodingApp(options)
         if options.sipot_mode == 'fuzzing':
-			import module_fuzzer
-			app = module_fuzzer.FuzzingApp(options)
+			app = FuzzingApp(options)
         if options.sipot_mode == 'spoofing':
-			import module_spoofer
-			app = module_spoofer.SpoofingApp(options)
+			app = SpoofingApp(options)
         if not 'app' in globals(): app = App(options)
         set_original_sigint(signal.getsignal(signal.SIGINT))
         signal.signal(signal.SIGINT, app.exit_gracefully)
+		# Start App
         app.start()
     except KeyboardInterrupt:
         print '' # to print a new line after ^C

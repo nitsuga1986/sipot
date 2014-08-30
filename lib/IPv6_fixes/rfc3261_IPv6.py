@@ -646,8 +646,6 @@ class TransportInfo:
     def __init__(self, sock, secure=False):
         '''The sock argument is the bound socket.'''
         addr = getlocaladdr(sock)
-        print "TransportINFO"
-        print addr
         self.host, self.port, self.type, self.secure, self.reliable, self.congestionControlled = addr[0], addr[1], (sock.type==socket.SOCK_DGRAM and 'udp' or 'tcp'), secure, (sock.type==socket.SOCK_STREAM), (sock.type==socket.SOCK_STREAM) 
 #---------------------------Transaction------------------------------------
 
