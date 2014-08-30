@@ -52,22 +52,21 @@ if __name__ == '__main__':
 	print (bcolors.OKGREEN+"==================================================================================================================="+bcolors.ENDC)
 	print (bcolors.OKGREEN+"Welcome to SIPOT test tool."+bcolors.ENDC)
 	print (bcolors.OKGREEN+"==================================================================================================================="+bcolors.ENDC)
-	# Usage
+	# Usage ------------------------------
 	usage = "Usage: %prog [options]"
 	usage += "Examples:\r\n"
 	usage += "Register extention:\r\n"
 	usage += "\tpython %prog --register --username 109 --pwd abc123 --reg-ip 192.168.56.77 \r\n"
 	usage += "\r\n"
-	
+	# Usage: MODULES 
 	usage = flooder_Usage(usage)
 	usage = fuzzer_Usage(usage)
 	usage = spoofer_Usage(usage)
-	
+	# Options ------------------------------
 	parser = OptionParser(usage,version="%prog v"+str(__version__)+__GPL__)
-	
 	parser.add_option('-v', '--verbose',   dest='verbose', default=False, action='store_true', help='enable verbose mode for this module')
 	parser.add_option('-V', '--verbose-all',   dest='verbose_all', default=False, action='store_true', help='enable verbose mode for all modules')
-    
+	# Options: Network
 	group1 = OptionGroup(parser, 'Network', 'Use these options for network configuration')
 	group1.add_option('',   '--transport', dest='transport', default='udp', help='the transport type is one of "udp", "tcp" or "tls". Default is "udp"')
 	group1.add_option('',   '--int-ip',  dest='int_ip',  default='0.0.0.0', help='listening IP address for SIP and RTP. Use this option only if you wish to select one out of multiple IP interfaces. Default "0.0.0.0"')
@@ -75,7 +74,7 @@ if __name__ == '__main__':
 	group1.add_option('',   '--max-size',dest='max_size', default=4096, type='int', help='size of received socket data. Default is 4096')
 	group1.add_option('',   '--interval',dest='interval', default=180, type='int', help='The interval argument specifies how often should the sock be checked for close, default is 180 s')
 	parser.add_option_group(group1)
-    
+	# Options: SIP
 	group2 = OptionGroup(parser, 'SIP', 'Use these options for SIP configuration')
 	group2.add_option('','--username',dest='username',default=None,help='username to use in my SIP URI and contacts. Default is "%s"'%(default_login,))
 	group2.add_option('','--pwd', dest='password', default='', help='set this if REGISTER requires pasword authentication. Default is empty "" to not set.  A list of passwords can be provided in the form of pwd1,pwd1,...,etc.')
@@ -84,22 +83,21 @@ if __name__ == '__main__':
 	group2.add_option('','--to',dest='to', default=None, help='the target SIP address, e.g., \'"Henry Sinnreich" <sip:henry@iptel.org>\'. This is mandatory')
 	group2.add_option('','--from',dest='fromAddr', default=None, help='the user SIP address, e.g., \'"Henry Sinnreich" <sip:henry@iptel.org>\'.')
 	group2.add_option('','--uri',dest='uri', default=None, help='the target request-URI, e.g., "sip:henry@iptel.org". Default is to derive from the --to option')
-	
 	group2.add_option('',   '--register',dest='register', default=False, action='store_true', help='enable user register befor sending messages')
 	group2.add_option('',   '--reg-username',    dest='reg_username', default=None, help='username used to for register. If not porvided --username will be used.')
 	group2.add_option('',   '--reg-ip',  dest='registrar_ip',  default=None, help='Registrar IP. If not provided is extracted from to address: A registrar is a server that accepts REGISTER requests and places the information it receives in those requests into the location service for the domain it handles.')
 	group2.add_option('',   '--register-interval', dest='register_interval', default=3600, type='int', help='registration refresh interval in seconds. Default is 3600')
 	group2.add_option('','--reg-refresh',dest='reg_refresh', default=False, action='store_true', help='Auto refresh registration. The refresh argument can be supplied to automatically perform registration refresh before the registration expires. Do not perform refresh by default.')
 	parser.add_option_group(group2)
-    
+	# Options: SIPOT
 	group3 = OptionGroup(parser, 'SIPOT', 'Use these options for SIP Open Tester configuration')
 	group3.add_option('-M',   '--sipot-mode', dest='sipot_mode', default='default', help='flooding / fuzzing / spoofing. set the mode of attack for SIPOT. Default is flooding.')
 	parser.add_option_group(group3)
-    
+	# Options: MODULES 
 	parser = flooder_Options(parser)
 	parser = fuzzer_Options(parser)
 	parser = spoofer_Options(parser)
-	
+	# Options: Generate Extention
 	group7 = OptionGroup(parser, 'Generate Extention', 'Extensions options for flooding. Changes the originator extention in each message.')
 	group7.add_option('',   '--no-modify-ext',dest='modify_extentions', default=True, action='store_false', help='If not specified, extentions will be modified in each message flooded. To generate extentions options --ext-dictionary &--ext-range  will be used.')
 	group7.add_option('',   "--ext-dictionary", dest="ExtDictionary", type="string",help="Specify a dictionary file with possible extension names")
@@ -108,20 +106,19 @@ if __name__ == '__main__':
 	group7.add_option('',   '--ext-range-template',  dest="ExtTemplate",action="store",help="""A format string which allows us to specify a template for the extensions example svwar.py -e 1-999 --template="123%#04i999" would scan between 1230001999 to 1230999999" """)
 	group7.add_option('',   '--ext-range-enabledefaults', dest="ExtDefaults", action="store_true", default=False, help="""Scan for default / typical extensions such as 1000,2000,3000 ... 1100, etc. This option is off by default. Use --enabledefaults to enable this functionality""")
 	parser.add_option_group(group7)
-	
+	# Parse Options 
 	(options, args) = parser.parse_args()
-    
 	handler = log.ColorizingStreamHandler(stream=sys.stdout)
 	handler.setLevel(logging.DEBUG)
 	handler.setFormatter(logging.Formatter('%(asctime)s.%(msecs)d %(name)s %(levelname)s - %(message)s', datefmt='%H:%M:%S'))
+	# Logger level ------------------------------
 	logging.getLogger().addHandler(handler)
-    
-	#-------------------- General options---------------------------------
 	logger.setLevel((options.verbose or options.verbose_all) and logging.DEBUG or logging.INFO)
+	# VALIDATE OPTIONS ------------------------------
 	if options.verbose_all:
 		if hasattr(rfc3261_IPv6, 'logger'): rfc3261_IPv6.logger.setLevel(logging.DEBUG)
 		else: rfc3261_IPv6._debug = True
-		
+	# List fuzzers
 	if options.list_fuzzers:
 		list_fuzzers = """
 ------------------------------------------------------------------------------------------------
@@ -142,6 +139,7 @@ if __name__ == '__main__':
 		"""
 		print list_fuzzers
 		sys.exit(-1)
+	# List spoofers
 	if options.list_spoof:
 		list_fuzzers = """
 ------------------------------------------------------------------------------------------------
@@ -185,7 +183,6 @@ if __name__ == '__main__':
 			options.registrar_ip = options.registrar_ip if options.registrar_ip else options.to.uri.host
 			options.port = options.to.uri.port if options.to.uri.port else options.port
 			options.to.uri.port = options.uri.port = options.port
-			
 	if not options.fromAddr:
 		options.username = options.username if options.username else (options.reg_username if options.reg_username else options.to.uri.user)
 		options.reg_username = options.reg_username if options.reg_username else options.username
@@ -213,6 +210,7 @@ class User(object):
 	'''The User object provides a layer between the application and the SIP stack.'''
 	REGISTERED, UDP, TCP, TLS = 'Registered user','udp', 'tcp', 'tls' # transport values
 	def __init__(self, app):
+		'''The Base User is initiated with the app objects, the socket setup and some general options.'''
 		self.app = app
 		self.state = self.reg_state = None
 		self.register = None
@@ -251,21 +249,25 @@ class User(object):
 		self._ua = None
 	
 	def add_listenerGen(self):
+		'''Adds the listener as a generator.'''
 		if not self._listenerGen:
 			self._listenerGen  = self._listener()
 			multitask.add(self._listenerGen)
 		return self
 	def add_registerGen(self):
+		'''Adds a Generator to Register the User.'''
 		if not self._registerGen:
 			self._registerGen  = self._register()
 			multitask.add(self._registerGen)
 		return self
 	
 	def close(self):
+		'''Ends registration (Reg_Interval=0) and closes the User agent.'''
 		self.register_interval = 0
 		multitask.add(self._register())
 		if self._ua.gen: self._ua.gen.close(); self._ua.gen = None
 	def stop(self):
+		'''Closes the listener and register generators.'''
 		if self._listenerGen:
 			self._listenerGen.close()
 		if self._registerGen:
@@ -274,8 +276,7 @@ class User(object):
 		return self
 	#-------------------- Internal ---------------------------------
 	def _createRegister(self):
-		'''Create a REGISTER Message and populate the Expires and Contact headers. It assumes
-		that self.reg is valid.'''
+		'''Create a REGISTER Message and populate the Expires and Contact headers.'''
 		m = self._ua.createRegister(self._ua.localParty)
 		m.Contact = rfc3261_IPv6.Header(str(self._stack.uri), 'Contact')
 		m.Contact.value.uri.user = self.localParty.uri.user
@@ -283,8 +284,7 @@ class User(object):
 		return m
 	#-------------------- Generators ---------------------------------
 	def _listener(self):
-		'''Listen for transport messages on the signaling socket. The default maximum 
-		packet size to receive is 1500 bytes. The interval argument specifies how
+		'''Listen for transport messages on the signaling socket. The interval argument specifies how
 		often should the sock be checked for close, default is 180 s.
 		This is a generator function and should be invoked as multitask.add(u._listener()).'''
 		self.app.status.append('Listener Generator Initiated')
@@ -299,6 +299,8 @@ class User(object):
 		except: print 'User._listener exception', (sys and sys.exc_info() or None); traceback.print_exc(); raise
 		logger.debug('terminating User._listener()')
 	def _register(self):
+		''' Calls the _registerUA() to register the User Agent and if success is returned reg_state => REGISTERED.
+		This is a generator function and should be invoked as multitask.add(u._register()).'''
 		self._ua.localParty, self._ua.remoteParty, self._ua.remoteTarget = self.registrarAddr.dup(), self.registrarAddr.dup(), self.registrarAddr.dup()
 		self.reg_result, self.reg_reason = yield self._registerUA()
 		if self.reg_result=='success': 
@@ -308,6 +310,7 @@ class User(object):
 				self.app.status.append(bcolors.OKGREEN+"Register succesful!"+bcolors.ENDC +" (user: "+self.app.options.username+", password: "+self.app.options.password+")")
 		else: self.app.status.append('Register result: '+self.reg_result+'. Reason: '+self.reg_reason)
 	def _registerUA(self):
+		''' Creates the requests to Register the use, Authenticates if neccesary and returns success/failed.'''
 		if self.reg_state == None:
 			self.app.status.append('Register Generator Initiated')
 		try:
@@ -445,8 +448,13 @@ class User(object):
 		multitask.add(_send(self, data, addr))
 #===================================================================================================================
 class App(object):
+	'''  Superclass used to define base methods. This App should be used by modules as class Module(App)
+	Provides basic __init__ that keeps options and calls mainController()
+	Provides basic App flow control for start, stop and close. Also exit_gracefully() to handle KeyboardInterrupt.
+	Main controller is defined as example to register a User Agent.'''
 	RUNNING = 'Runnning'
 	def __init__(self, options):
+		''' Inits App with options and calls mainController()'''
 		logger.info("ntsga: init app")
 		self.options = options
 		self.status = []
@@ -454,6 +462,8 @@ class App(object):
 		multitask.add(self.mainController())
 		
 	def start(self):
+		'''Creates a User Agent, adds the Listener and attempts to Register if option is selected
+		Starts main TaskManager() loop'''
 		self.createUser()
 		self.user = self.user.add_listenerGen()
 		if self.options.register: self.user.add_registerGen()
@@ -465,10 +475,12 @@ class App(object):
 		return self
 
 	def createUser(self):
+		''' Creates client using User().createClient() method'''
 		self.user = User(self).createClient()
 		return self
 
 	def exit_gracefully(self, signum, frame):
+		''' Prevents Interrupt default and asks "Really quit?" before exit app.'''
 		import signal
 		signal.signal(signal.SIGINT, return_original_sigint())
 		try:
@@ -482,6 +494,7 @@ class App(object):
 			except Exception: os._exit(1)
 
 	def mainController(self):
+		''' Basic loop to show status and close app once user is registered'''
 		logger.info("ntsga: start main default controller")
 		while True:
 			if self.status:
@@ -492,14 +505,17 @@ class App(object):
 			yield
 
 	def printResults(self):
+		''' Basic method called by exit_gracefully() to print all collected results befor quit.'''
 		print "No results... =("
 		return self
 		
 	def stop(self):
+		'''Stops TaskManager() main loop'''
 		self.RUNNING = False
 		return self
 		
 	def close(self): 
+		'''Stops user client'''
 		if self.user:
 			self.user.stop()
 #===================================================================================================================
