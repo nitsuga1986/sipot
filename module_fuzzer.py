@@ -1,20 +1,36 @@
 # Fuzzing App
-
-import os, sys, traceback, socket, multitask
-from sipot import App, User, logger, bcolors
-
-# 39peers
-sys.path.append(''.join([os.getcwd(), '/lib/IPv6_fixes']))
-import rfc2396_IPv6, rfc3261_IPv6
-# Sulley
-sys.path.append(''.join([os.getcwd(), '/lib/sulley']))
-from sulley import *
-sys.path.append(''.join([os.getcwd(), '/lib/sulley/requests']))
-import sip_block
-# Others: [multitask, pptable]
-sys.path.append(''.join([os.getcwd(), '/lib/']))
-
-
+#===================================================================================================================
+#------------------------------IMPORT------------------------------
+try:
+	import sys, os, socket, multitask, traceback
+	from sipot import App, User, logger
+	# 39peers (IPv6 fixed)
+	sys.path.append(''.join([os.getcwd(), '/lib/IPv6_fixes']))
+	import rfc2396_IPv6, rfc3261_IPv6
+	# Sulley
+	sys.path.append(''.join([os.getcwd(), '/lib/sulley']))
+	from sulley import *
+	sys.path.append(''.join([os.getcwd(), '/lib/sulley/requests']))
+	import sip_block
+	# Others: [multitask, pptable, helper_functions]
+	sys.path.append(''.join([os.getcwd(), '/lib/']))
+	from helper_functions import bcolors
+except ImportError: print 'We had a problem importing dependencies.'; traceback.print_exc(); sys.exit(1)
+#===================================================================================================================
+def module_Options(parser):
+	from optparse import OptionGroup
+	group_fuzzer = OptionGroup(parser, 'Fuzzing Mode', 'use this options to set fuzzing parameters')
+	group_fuzzer.add_option('-l', '--fuzz-fuzzer-list', default=False, action='store_true', dest='list_fuzzers', help='Display a list of available fuzzers')
+	group_fuzzer.add_option('',   '--fuzz-fuzzer', dest='fuzzer', default='InviteCommonFuzzer', help='Set fuzzer. Default is InviteCommonFuzzer. Use -l to see a list of all available fuzzers')
+	group_fuzzer.add_option('',   '--fuzz-crash', default=False, action='store_true', dest='crash_detect', help='Enables crash detection')
+	group_fuzzer.add_option('',   '--fuzz-crash-method', dest='crash_method', default='OPTIONS', help='Set crash method. By default uses OPTIONS message and stores response.')
+	group_fuzzer.add_option('',   '--fuzz-crash-no-stop', default=False, action='store_true', dest='no_stop_at_crash', help='If selected prevents the app to be stoped when a crash is detected.')
+	group_fuzzer.add_option('',   '--fuzz-max', dest='fuzz_max_msgs', default=99999, type="int", help='Sets the maximum number of messages to be sent by fuzzing mode. Default is max available in fuzzer.')
+	group_fuzzer.add_option('',   '--fuzz-to-file', dest='file_name', default=None, help='Print the output to a file with the given name.')
+	group_fuzzer.add_option('',   '--fuzz-audit', dest='audit_file_name', default=None, help='Enables fuzzing audit. All messages sent (fuzzing) will be saved into the given file name.')
+	parser.add_option_group(group_fuzzer)     
+	return parser
+#===================================================================================================================
 class fuzzerUser(User):
 	'''The User object provides a layer between the application and the SIP stack.'''
 	# self.state  				//  user state
@@ -295,7 +311,7 @@ class fuzzerUser(User):
 				self.crash_det_state = self.CRASH_ERROR
 		except GeneratorExit:
 			raise StopIteration(('failed', 'Generator closed'))
-
+#===================================================================================================================
 class FuzzingApp(App):
 	def __init__(self, options):
 		App.__init__(self,options)

@@ -1,4 +1,19 @@
-# Helpers ---------
+# General Helper ---------
+original_sigint = 0
+def set_original_sigint(sigint):
+    global original_sigint    # Needed to modify global copy of globvar
+    original_sigint = sigint
+def return_original_sigint():
+    return original_sigint     # No need for global declaration to read value of globvar
+class bcolors:
+	HEADER = '\033[95m'
+	OKBLUE = '\033[94m'
+	OKGREEN = '\033[92m'
+	WARNING = '\033[93m'
+	FAIL = '\033[91m'
+	ENDC = '\033[0m'
+
+# Flooder Helper ---------
 def generateExtentions(rangelist,zeropadding=0,template=None,defaults=False,staticbrute=[]):
 	"""generateExtentions gives a yield generator. accepts either zeropadding or template as optional argument"""
 	def getRange(rangestr):

@@ -1,14 +1,26 @@
 # Flooding App
-
-import sys, os, socket, multitask, random
-from sipot import App, User, logger
-
-# 39peers
-sys.path.append(''.join([os.getcwd(), '/lib/IPv6_fixes']))
-import rfc2396_IPv6, rfc3261_IPv6
-# Others: [multitask, helper_functions]
-sys.path.append(''.join([os.getcwd(), '/lib/']))
-
+#===================================================================================================================
+#------------------------------IMPORT------------------------------
+try:
+	import sys, os, socket, multitask, random
+	from sipot import App, User, logger
+	# 39peers (IPv6 fixed)
+	sys.path.append(''.join([os.getcwd(), '/lib/IPv6_fixes']))
+	import rfc2396_IPv6, rfc3261_IPv6
+	# Others: [multitask, helper_functions]
+	sys.path.append(''.join([os.getcwd(), '/lib/']))
+except ImportError: print 'We had a problem importing dependencies.'; traceback.print_exc(); sys.exit(1)
+#===================================================================================================================
+def module_Options(parser):
+	from optparse import OptionGroup
+	group_flooder = OptionGroup(parser, 'Flooding Mode', 'use this options to set flooding parameters')
+	group_flooder.add_option('',   '--flood-number', dest='flood_num', default=666, type="int", help='Sets the number of messages to be sent by flooding mode. Default is 500.')
+	group_flooder.add_option('',   '--flood-method', dest='flood_method', default='REGISTER', help='Set the method to flood. Default is REGISTER.')
+	group_flooder.add_option('',   '--flood-msg-file', dest='flood_msg_file', default=None, help='Provide a message from file to flood.')
+	group_flooder.add_option('', 	'--flood-file-noparse', default=False, action='store_true', dest='flood_noparse', help='Prevents the flooder to parse the message. By default try to parse.')
+	parser.add_option_group(group_flooder)  
+	return parser
+#===================================================================================================================
 class flooderUser(User):
 	'''The User object provides a layer between the application and the SIP stack.'''
 	FLOODING = 'User flooding'
@@ -145,7 +157,7 @@ class flooderUser(User):
 				else:
 					logger.debug('invalid socket type', self.sock.type)
 		except AttributeError: pass
-
+#===================================================================================================================
 class FloodingApp(App):
 	def __init__(self, options):
 		App.__init__(self,options)

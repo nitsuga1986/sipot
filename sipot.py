@@ -21,21 +21,24 @@ __version__ = '0.1'
 __prog__ = 'sipot'
 __desc__ = "SIP Open Tester"
 
-import os, sys, traceback, socket, multitask, random, logging, signal
-
+#===================================================================================================================
+#------------------------------IMPORT------------------------------
 try:
+	import os, sys, traceback, socket, multitask, random, logging, signal
 	sys.path.append(''.join([os.getcwd(), '/lib/39peers/std']))
 	import rfc3550, rfc4566, rfc3489bis, kutil
 	sys.path.append(''.join([os.getcwd(), '/lib/IPv6_fixes']))
 	import rfc3261_IPv6, rfc2396_IPv6
 	sys.path.append(''.join([os.getcwd(), '/lib/39peers/external']))
 	import log
-	
-except ImportError: print 'Please install p2p-sip and include p2p-sip/src and p2p-sip/src/external in your PYTHONPATH'; traceback.print_exc(); sys.exit(1)
+	# Others: [multitask, helper_functions]
+	sys.path.append(''.join([os.getcwd(), '/lib/']))
+	# Signal exit
+	from helper_functions import original_sigint, set_original_sigint, return_original_sigint, bcolors
+except ImportError: print 'We had a problem importing dependencies.'; traceback.print_exc(); sys.exit(1)
 logger = logging.getLogger('app') # debug(), info(), warning(), error() and critical()
-
-    
-# ntsga: parse command line options, and set the high level properties
+#===================================================================================================================
+#------------------------------MAIN(1)[Usage+Options]------------------------------
 if __name__ == '__main__': 
 	default_ext_ip, default_domain, default_login = kutil.getlocaladdr()[0], socket.gethostname(), os.getlogin()
 	from optparse import OptionParser, OptionGroup
@@ -57,8 +60,8 @@ if __name__ == '__main__':
 	usage += "\r\n"
 	
 	usage += "Fuzzing mode:\r\n"
-	usage += "\t *** Fuzzes the headers commonly found in a SIP INVITE request an IPv6 address: ***\r\n"
-	usage += "\t python %prog --sipot-mode fuzzing --to sip:109@192.168.56.77:5060 \r\n"
+	usage += "\t *** Fuzzes the headers commonly found in a SIP INVITE request a IPv6 address: ***\r\n"
+	usage += "\t python %prog --sipot-mode fuzzing --to sip:6000@[fd11:5001:ccc3:d9ab:0:0:0:3]:5060 \r\n"
 	usage += "\t *** Fuzzes the headers commonly found in a SIP REGISTER request to 192.168.56.77: ***\r\n"
 	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer REGISTERFuzzer --to sip:109@192.168.56.77:5060 \r\n"
 	usage += "\t *** Uses all available fuzzers to 192.168.56.77: ***\r\n"
@@ -120,36 +123,12 @@ if __name__ == '__main__':
 	group3.add_option('-M',   '--sipot-mode', dest='sipot_mode', default='default', help='flooding / fuzzing / spoofing. set the mode of attack for SIPOT. Default is flooding.')
 	parser.add_option_group(group3)
     
-	group4 = OptionGroup(parser, 'Flooding Mode', 'use this options to set flooding parameters')
-	group4.add_option('',   '--flood-number', dest='flood_num', default=666, type="int", help='Sets the number of messages to be sent by flooding mode. Default is 500.')
-	group4.add_option('',   '--flood-method', dest='flood_method', default='REGISTER', help='Set the method to flood. Default is REGISTER.')
-	group4.add_option('',   '--flood-msg-file', dest='flood_msg_file', default=None, help='Provide a message from file to flood.')
-	group4.add_option('', 	'--flood-file-noparse', default=False, action='store_true', dest='flood_noparse', help='Prevents the flooder to parse the message. By default try to parse.')
-	parser.add_option_group(group4)
-	
-	group5 = OptionGroup(parser, 'Fuzzing Mode', 'use this options to set fuzzing parameters')
-	group5.add_option('-l', '--fuzz-fuzzer-list', default=False, action='store_true', dest='list_fuzzers', help='Display a list of available fuzzers')
-	group5.add_option('',   '--fuzz-fuzzer', dest='fuzzer', default='InviteCommonFuzzer', help='Set fuzzer. Default is InviteCommonFuzzer. Use -l to see a list of all available fuzzers')
-	group5.add_option('',   '--fuzz-crash', default=False, action='store_true', dest='crash_detect', help='Enables crash detection')
-	group5.add_option('',   '--fuzz-crash-method', dest='crash_method', default='OPTIONS', help='Set crash method. By default uses OPTIONS message and stores response.')
-	group5.add_option('',   '--fuzz-crash-no-stop', default=False, action='store_true', dest='no_stop_at_crash', help='If selected prevents the app to be stoped when a crash is detected.')
-	group5.add_option('',   '--fuzz-max', dest='fuzz_max_msgs', default=99999, type="int", help='Sets the maximum number of messages to be sent by fuzzing mode. Default is max available in fuzzer.')
-	group5.add_option('',   '--fuzz-to-file', dest='file_name', default=None, help='Print the output to a file with the given name.')
-	group5.add_option('',   '--fuzz-audit', dest='audit_file_name', default=None, help='Enables fuzzing audit. All messages sent (fuzzing) will be saved into the given file name.')
-	parser.add_option_group(group5)
-	
-	group6 = OptionGroup(parser, 'Spoofing Mode', 'use this options to set spoof parameters')
-	group6.add_option('',   '--spoof', dest='spoof_mode', default='spfINVITE', help='Set the method to spoof. Default is INVITE.')
-	group6.add_option('', 	'--spoof-auto', default=False, action='store_true', dest='spoof_auto', help='Automatically spoofs messages when messages are sniffed.')
-	group6.add_option('', 	'--spoof-auto-target', default='AB', dest='auto_spoof_target', help='Select wich target to spoof: AB: Both sides (default). A:Only side A. B: Only side B.')
-	group6.add_option('-L', '--spoof-list', default=False, action='store_true', dest='list_spoof', help='Display a list of available spoof modes.')
-	group6.add_option('',   '--spoof-name', dest='spoof_name', default=None, help='Set the name to spoof.')
-	group6.add_option('',   '--spoof-contact', dest='spoof_contact', default=None, help='Set the contact header to spoof. ie. sip:666@192.168.1.129:5060.')
-	group6.add_option('',   '--spoof-msg-file', dest='spoof_msg_file', default=None, help='Spoof message from file.')
-	group6.add_option('',   '--spoof-lTag', dest='spoof_local_tag', default=None, help='Local tag to use in spoof message. ie: as5c9c6524')
-	group6.add_option('',   '--spoof-rTag', dest='spoof_remote_tag', default=None, help='Remote tag to use in spoof message. ie: 1605a146-d627-e411-8066-0800273bf55a')
-	group6.add_option('',   '--spoof-callID', dest='spoof_callID', default=None, help='Call-ID to use in spoof message. ie: 27679bab736046f14798e8b5593222f3@192.168.56.77:5060')
-	parser.add_option_group(group6)
+	from  module_flooder import  module_Options
+	parser = module_Options(parser)
+	from  module_fuzzer import  module_Options
+	parser = module_Options(parser)
+	from  module_spoofer import  module_Options
+	parser = module_Options(parser)
 	
 	group7 = OptionGroup(parser, 'Generate Extention', 'Extensions options for flooding. Changes the originator extention in each message.')
 	group7.add_option('',   '--no-modify-ext',dest='modify_extentions', default=True, action='store_false', help='If not specified, extentions will be modified in each message flooded. To generate extentions options --ext-dictionary &--ext-range  will be used.')
@@ -259,16 +238,7 @@ if __name__ == '__main__':
 	if options.auto_spoof_target not in ['AB','A','B']:
 		print "<"+options.auto_spoof_target+"> is not an available target: Options: AB/A/B."
 		sys.exit(-1)
-
-class bcolors:
-	HEADER = '\033[95m'
-	OKBLUE = '\033[94m'
-	OKGREEN = '\033[92m'
-	WARNING = '\033[93m'
-	FAIL = '\033[91m'
-	ENDC = '\033[0m'
-	
-# Base User class
+#===================================================================================================================
 class User(object):
 	'''The User object provides a layer between the application and the SIP stack.'''
 	REGISTERED, UDP, TCP, TLS = 'Registered user','udp', 'tcp', 'tls' # transport values
@@ -507,8 +477,7 @@ class User(object):
 						logger.debug('invalid socket type', self.sock.type)
 			except AttributeError: pass
 		multitask.add(_send(self, data, addr))
-
-# Base App class
+#===================================================================================================================
 class App(object):
 	RUNNING = 'Runnning'
 	def __init__(self, options):
@@ -541,9 +510,10 @@ class App(object):
 				self.printResults()
 				self.stop()
 		except KeyboardInterrupt:
-			print("Ok ok, quitting")
-			sys.exit(1)
-		signal.signal(signal.SIGINT, exit_gracefully)
+			try:
+				print("\nOk ok, quitting... =/")
+				os._exit(1)
+			except Exception: os._exit(1)
 
 	def mainController(self):
 		logger.info("ntsga: start main default controller")
@@ -566,14 +536,8 @@ class App(object):
 	def close(self): 
 		if self.user:
 			self.user.stop()
-# Signal exit
-original_sigint = 0
-def set_original_sigint(sigint):
-    global original_sigint    # Needed to modify global copy of globvar
-    original_sigint = sigint
-def return_original_sigint():
-    return original_sigint     # No need for global declaration to read value of globvar
-#-------------------- START APPS---------------------------------
+#===================================================================================================================
+#------------------------------MAIN(2)[Start App]------------------------------
 if __name__ == '__main__':
     try:
         print "------------------------------------------------------------------------------------------------------------"
@@ -598,10 +562,4 @@ if __name__ == '__main__':
     try:
         app.close()
     except KeyboardInterrupt:
-        print "the end."
-        
-        
-        
-        
-
-
+        print "[*] The end."
