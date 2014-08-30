@@ -8,7 +8,7 @@ SIPOT: SIP Open Tester
 *   **Spoofer:** Utlizar técnicas de [spoofing](http://es.wikipedia.org/wiki/Spoofing) sobre un objetivo
 
 ## Descripción general: ##
-La presente herramienta propone el uso de la librerìa de 39Peers desarrollada por Kundan Singh para el desarrollo de una herramienta interactiva que permita auditar sistemas VoIP basados en SIP.
+SIPOT es una herraminta interactiva que permita auditar sistemas VoIP basados en SIP. La misma fue desarrollada de manera modular y pensada para ser reutilizada y modificada. La misma posee tres módulos base que realizan ataques comunes en sistemas sip: Flooding, Fuzzing, Spoofing. La presente herramienta soporta ataques en redes IPv6.
 
 1.   **Flooding**
 2.   **Fuzzing**
@@ -137,9 +137,9 @@ El uso del módulo es muy sencillo pero efectivo. Los mensajes son generados a p
                         dictionary &--ext-range  will be used.
 
 #### Ejemplos ####
-Flood 500 Msg to 192.168.56.77:
+Flood 500 Msg to IPv6 address:
 
-`python sipot.py --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500`
+`python sipot.py --sipot-mode flooding --to sip:6000@[fd11:5001:ccc3:d9ab:0:0:0:3]:5060 --flood-number 500`
 
 Flood 500 Msg from File to 192.168.56.77:
 
@@ -181,9 +181,9 @@ Este módulo se encarga del envío de mensajes SIP a la dirección destino en un
                         Print the output to a file with the given name.
 
 #### Ejemplos ####
-Fuzzes the headers commonly found in a SIP INVITE request to 192.168.56.77:
+Fuzzes the headers commonly found in a SIP INVITE request to a IPv6 address:
 
-`python sipot.py --sipot-mode fuzzing --to sip:109@192.168.56.77:5060`
+`python sipot.py --sipot-mode fuzzing --to sip:6000@[fd11:5001:ccc3:d9ab:0:0:0:3]:5060`
 
 Fuzzes the headers commonly found in a SIP REGISTER request to 192.168.56.77:
 

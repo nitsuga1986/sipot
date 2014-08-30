@@ -57,7 +57,7 @@ if __name__ == '__main__':
 	usage += "\r\n"
 	
 	usage += "Fuzzing mode:\r\n"
-	usage += "\t *** Fuzzes the headers commonly found in a SIP INVITE request to 192.168.56.77: ***\r\n"
+	usage += "\t *** Fuzzes the headers commonly found in a SIP INVITE request an IPv6 address: ***\r\n"
 	usage += "\t python %prog --sipot-mode fuzzing --to sip:109@192.168.56.77:5060 \r\n"
 	usage += "\t *** Fuzzes the headers commonly found in a SIP REGISTER request to 192.168.56.77: ***\r\n"
 	usage += "\t python %prog --sipot-mode fuzzing --fuzz-fuzzer REGISTERFuzzer --to sip:109@192.168.56.77:5060 \r\n"
