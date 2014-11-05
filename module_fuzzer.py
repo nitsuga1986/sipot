@@ -2,8 +2,7 @@
 #===================================================================================================================
 __GPL__ = """
 
-   Sipvicious extension line scanner scans SIP PaBXs for valid extension lines
-   Copyright (C) 2012 Sandro Gauci <sandro@enablesecurity.com>
+   Sipot extension: fuzzer module
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

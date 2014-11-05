@@ -2,8 +2,7 @@
 #===================================================================================================================
 __GPL__ = """
 
-   Sipvicious extension line scanner scans SIP PaBXs for valid extension lines
-   Copyright (C) 2012 Sandro Gauci <sandro@enablesecurity.com>
+   SIPOT module
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,15 +24,16 @@ __desc__ = "SIP Open Tester"
 #===================================================================================================================
 #------------------------------IMPORT------------------------------
 try:
-	import os, sys, traceback, socket, multitask, random, logging, signal
+	import os, sys, traceback, socket, random, logging, signal
 	sys.path.append(''.join([os.getcwd(), '/lib/39peers/std']))
-	import rfc3550, rfc4566, rfc3489bis, kutil
+	import rfc3550, rfc4566, kutil
 	sys.path.append(''.join([os.getcwd(), '/lib/IPv6_fixes']))
 	import rfc3261_IPv6, rfc2396_IPv6
 	sys.path.append(''.join([os.getcwd(), '/lib/39peers/external']))
 	import log
 	# Others: [multitask, helper_functions]
 	sys.path.append(''.join([os.getcwd(), '/lib/']))
+	import multitask
 	# Signal exit
 	from helper_functions import original_sigint, set_original_sigint, return_original_sigint, bcolors
 	logger = logging.getLogger('app') # debug(), info(), warning(), error() and critical()
@@ -70,7 +70,7 @@ if __name__ == '__main__':
 	group1 = OptionGroup(parser, 'Network', 'Use these options for network configuration')
 	group1.add_option('',   '--transport', dest='transport', default='udp', help='the transport type is one of "udp", "tcp" or "tls". Default is "udp"')
 	group1.add_option('',   '--int-ip',  dest='int_ip',  default='0.0.0.0', help='listening IP address for SIP and RTP. Use this option only if you wish to select one out of multiple IP interfaces. Default "0.0.0.0"')
-	group1.add_option('',   '--port',    dest='port',    default=5062, type="int", help='listening port number for SIP UDP/TCP. TLS is one more than this. Default is 5092')
+	group1.add_option('',   '--port',    dest='port',    default=5060, type="int", help='listening port number for SIP UDP/TCP. TLS is one more than this. Default is 5092')
 	group1.add_option('',   '--max-size',dest='max_size', default=4096, type='int', help='size of received socket data. Default is 4096')
 	group1.add_option('',   '--interval',dest='interval', default=180, type='int', help='The interval argument specifies how often should the sock be checked for close, default is 180 s')
 	parser.add_option_group(group1)
@@ -169,7 +169,7 @@ if __name__ == '__main__':
 		if not options.to:
 			if not options.uri:
 				options.registrar_ip = options.registrar_ip if options.registrar_ip else options.domain
-				options.to = rfc2396_IPv6.Address(str('<sip:'+options.username+'@'+(options.registrar_ip if rfc2396_IPv6.isIPv4(options.registrar_ip) else ('['+options.registrar_ip+']'))+'>'))
+				options.to = rfc2396_IPv6.Address(str('<sip:'+str(options.username)+'@'+str(options.registrar_ip if rfc2396_IPv6.isIPv4(options.registrar_ip) else ('['+options.registrar_ip+']'))+'>'))
 				options.uri = options.to.uri.dup()
 				options.to.uri.port = options.uri.port = options.port
 			else:
@@ -186,7 +186,7 @@ if __name__ == '__main__':
 	if not options.fromAddr:
 		options.username = options.username if options.username else (options.reg_username if options.reg_username else options.to.uri.user)
 		options.reg_username = options.reg_username if options.reg_username else options.username
-		options.fromAddr = rfc2396_IPv6.Address(str('<sip:'+options.username+'@'+(options.registrar_ip if rfc2396_IPv6.isIPv4(options.registrar_ip) else ('['+options.registrar_ip+']'))+'>'))
+		options.fromAddr = rfc2396_IPv6.Address(str('<sip:'+str(options.username)+'@'+str(options.registrar_ip if rfc2396_IPv6.isIPv4(options.registrar_ip) else ('['+options.registrar_ip+']'))+'>'))
 		options.fromAddr.uri.port = options.port
 	else:
 		options.fromAddr = rfc2396_IPv6.Address(options.fromAddr)
@@ -198,6 +198,7 @@ if __name__ == '__main__':
 	# Validate Fuzzing options
 	if not options.crash_detect: options.audit_file_name = None
 	# Validate Spoofing options
+	if options.spoof_srcURI: options.spoof_srcURI = rfc2396_IPv6.URI(options.spoof_srcURI)
 	if options.spoof_mode not in ['spfINVITE','spfBYE','spfCANCEL']:
 		print "<"+options.spoof_mode+"> is not an available spoofing mode. Please check -L."
 		sys.exit(-1)

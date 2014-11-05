@@ -2,8 +2,7 @@
 #===================================================================================================================
 __GPL__ = """
 
-   Sipvicious extension line scanner scans SIP PaBXs for valid extension lines
-   Copyright (C) 2012 Sandro Gauci <sandro@enablesecurity.com>
+   Sipot extension: spoofer module
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -68,6 +67,7 @@ def module_Options(parser):
 	group_spoofer.add_option('', 	'--spoof-auto-target', default='AB', dest='auto_spoof_target', help='Select wich target to spoof: AB: Both sides (default). A:Only side A. B: Only side B.')
 	group_spoofer.add_option('-L', '--spoof-list', default=False, action='store_true', dest='list_spoof', help='Display a list of available spoof modes.')
 	group_spoofer.add_option('',   '--spoof-name', dest='spoof_name', default=None, help='Set the name to spoof.')
+	group_spoofer.add_option('',   '--spoof-srcURI', dest='spoof_srcURI', default=None, help='Source URI to use in the created message')		
 	group_spoofer.add_option('',   '--spoof-contact', dest='spoof_contact', default=None, help='Set the contact header to spoof. ie. sip:666@192.168.1.129:5060.')
 	group_spoofer.add_option('',   '--spoof-msg-file', dest='spoof_msg_file', default=None, help='Spoof message from file.')
 	group_spoofer.add_option('',   '--spoof-lTag', dest='spoof_local_tag', default=None, help='Local tag to use in spoof message. ie: as5c9c6524')
@@ -91,6 +91,7 @@ class spooferUser(User):
 		self.spoof_callID = app.options.spoof_callID
 		self.spoof_auto = app.options.spoof_auto
 		self.auto_spoof_target = app.options.auto_spoof_target
+		self.spoof_srcURI = app.options.spoof_srcURI
         #Spoofer sets
 		self._spooferGen = None
 		self._snifferGen = None
@@ -163,7 +164,7 @@ class spooferUser(User):
 		else:
 			# Spoofs ---------
 			if self.spoof_mode == 'spfINVITE':
-				self.spoof_name = 'SIPOT Caller ID'
+				self.spoof_name = 'SIPOT Caller ID' if not self.spoof_name else self.spoof_name
 			if self.spoof_mode == 'spfBYE' and message.method != 'BYE':
 				message = _createBYE(message)
 			if self.spoof_mode == 'spfCANCEL' and message.method != 'CANCEL':
@@ -194,6 +195,18 @@ class spooferUser(User):
 				except ValueError, E: pass # TODO: send 400 response to non-ACK request
 			else:
 				m = self._ua.createRequest(self.spoof_method)
+				if self.spoof_srcURI:
+					m.From.value.uri = self.spoof_srcURI
+				if m.method == "INVITE":
+					if self.app.options.registrar_ip != self.app.options.to.uri.host:
+						SourceFakeAddr = self.app.options.registrar_ip
+					else:
+						SourceFakeAddr = str(self.app.options.to.uri.host).split('.')
+						SourceFakeAddr[3] = str(random.randint(0,254))
+						SourceFakeAddr = ".".join(SourceFakeAddr)
+					if not self.spoof_srcURI:
+						m.From.value.uri.user = m.From.value.displayName =  str(random.randint(0,999))
+						m.From.value.uri.host = SourceFakeAddr
 				m.Contact = rfc3261_IPv6.Header(str(self._stack.uri), 'Contact')
 				m.Contact.value.uri.user = self.localParty.uri.user
 				m.Expires = rfc3261_IPv6.Header(str(self.app.options.register_interval), 'Expires')
@@ -377,6 +390,7 @@ class SpoofingApp(App):
 		logger.info("ntsga: init spoofing app")
 		
 	def start(self):
+		print "Starting Spoofing App"
 		self.createUser()
 		self.user = self.user.add_listenerGen()
 		if self.options.register: self.user.add_registerGen()
