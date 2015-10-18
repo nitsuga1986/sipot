@@ -1,0 +1,22 @@
+The following examples were tested using this scenario:
+========================================= PBX ========================================= 
+[*] AsteriskNow 3.0.0 =================================================================
+*Interfaces IPs
+	eth1: 192.168.1.77/24
+	eth0: 192.168.56.77/24
+	eth0: fd11:5001:ccc3:d9ab::77/64
+*Extentions 
+	WinXlite <107>
+	DebianEkiga <108>
+	UbuntuEkiga <109>
+	CandEkiga <110>
+	CelSIP <111>
+	BoxUntu <112>
+	120 <120>
+====================================== SOPHONEs ======================================= 
+[*] Debian GNU/Linux 6.0 64bits =======================================================
+*Interfaces IPs
+* Sophone Ekiga 3.2.7
+Name: DebianEkiga
+Registrar: 192.168.56.77
+Extention: 108

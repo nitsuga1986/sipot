@@ -1238,7 +1238,7 @@ s_block_end()
 s_initialize("NOTIFY")
 
 if s_block_start("notify_request_line"):
-    s_static("NOTIFY sip:USER@HOST SIP/2.0\r\n")
+    s_static("NOTIFY sip:TARGET_USER@HOST SIP/2.0\r\n")
 s_block_end()
 
 if s_block_start("notify_header"):

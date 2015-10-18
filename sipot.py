@@ -81,7 +81,7 @@ if __name__ == '__main__':
 	group2.add_option('','--domain',dest='domain',  default=default_domain, help='domain portion of my SIP URI. Default is to use local hostname, which is "%s"'%(default_domain,))
 	group2.add_option('','--proxy',dest='proxy',   default='', help='IP address of the SIP proxy to use. Default is empty "" to mean disable outbound proxy')
 	group2.add_option('','--to',dest='to', default=None, help='the target SIP address, e.g., \'"Henry Sinnreich" <sip:henry@iptel.org>\'. This is mandatory')
-	group2.add_option('','--from',dest='fromAddr', default=None, help='the user SIP address, e.g., \'"Henry Sinnreich" <sip:henry@iptel.org>\'.')
+	group2.add_option('','--from',dest='fromAddr', default=None, help='the user SIP address, e.g., \'<sip:104@192.168.56.1>\'.')
 	group2.add_option('','--uri',dest='uri', default=None, help='the target request-URI, e.g., "sip:henry@iptel.org". Default is to derive from the --to option')
 	group2.add_option('',   '--register',dest='register', default=False, action='store_true', help='enable user register befor sending messages')
 	group2.add_option('',   '--reg-username',    dest='reg_username', default=None, help='username used to for register. If not porvided --username will be used.')

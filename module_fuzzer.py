@@ -167,12 +167,13 @@ class fuzzerUser(User):
 				# This stuff is new in this function and should be moved elsewhere
 				# Works fine here for now though
 				rendered_msg = rendered_msg.replace('TARGET_USER', self.remoteParty.uri.user)
+				rendered_msg = rendered_msg.replace('HOST', self.remoteParty.uri.host)
 				rendered_msg = rendered_msg.replace('USER', self.localParty.uri.user)
-				rendered_msg = rendered_msg.replace('HOST', self.localParty.uri.host)
+				rendered_msg = rendered_msg.replace('LOCAL_IP', self.localParty.uri.host)
 				rendered_msg = rendered_msg.replace('192.168.96.69', self.localParty.uri.host)
 				rendered_msg = rendered_msg.replace('192.168.99.99', self.localParty.uri.host)        
 				rendered_msg = rendered_msg.replace('PORT', str(self.localParty.uri.port))
-				rendered_msg = rendered_msg.replace('LOCAL_IP', self.localParty.uri.host)
+				rendered_msg = rendered_msg.replace(':password', '')
 				return rendered_msg
 				
 			if not self.fuzzer == 'All':
