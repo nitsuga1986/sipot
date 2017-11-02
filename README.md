@@ -3,9 +3,13 @@ SIPOT: SIP Open Tester
 
 *Herramienta para auditar sistemas VoIP basados en SIP*
 
-***TESIS DE POSTGRADO (ITBA)***\n
-**Maestría en Ingeniería de las Telecomunicaciones**\n
-*Herramienta interactiva para evaluar vulnerabilidades en sistemas basados en SIP*\n
+
+***TESIS DE POSTGRADO (ITBA)***
+
+**Maestría en Ingeniería de las Telecomunicaciones**
+
+*Herramienta interactiva para evaluar vulnerabilidades en sistemas basados en SIP*
+
 
 ### Implementa 3 módulos: ###
 *   **Flooder:** Realizar [flooding](http://es.wikipedia.org/wiki/Flood) sobre un objetivo.
