@@ -3,7 +3,9 @@ SIPOT: SIP Open Tester
 **Herramienta para auditar sistemas VoIP basados en SIP**
 
 ***TESIS DE POSTGRADO***
+
 ***MAESTRÍA EN INGENIERÍA DE LAS TELECOMUNICACIONES (ITBA)***
+
 ***Herramienta interactiva para evaluar vulnerabilidades en sistemas basados en SIP***
 
 ### Implementa 3 módulos: ###
