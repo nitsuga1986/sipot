@@ -126,6 +126,8 @@ La presente herramienta consta de (3) módulos principales, con sus diferentes o
 ### Flooding ###
 _**Estado:** Completo (en verificación)._
 
+![< Flooding Test Image >](./img/flooding_test.png)
+
 #### Descripción ####
 
 > [Flood](http://es.wikipedia.org/wiki/Flood)  es un término en inglés que significa literalmente inundación.Se usa en la jerga informática para designar un comportamiento abusivo de la red de comunicaciones, normalmente por la repetición desmesurada de algún mensaje en un corto espacio de tiempo.
@@ -161,6 +163,8 @@ Flood 500 Msg to 192.168.56.77 changing extentions with dictionary:
 
 ### Fuzzing ###
 _**Estado:** Completo (en verificación)._
+
+![< Fuzzing Test Image >](./img/fuzzing_test.png)
 
 #### Descripción ####
 
@@ -210,6 +214,8 @@ Fuzz and print results to a file:
 
 ### Spoofing ###
 _**Estado:** Completo (en verificación)._
+
+![< Spoofing Test Image >](./img/spoofing_test.png)
 
 #### Descripción ####
 
