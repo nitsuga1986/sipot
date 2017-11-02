@@ -2,6 +2,10 @@ SIPOT: SIP Open Tester
 ========
 **Herramienta para auditar sistemas VoIP basados en SIP**
 
+***TESIS DE POSTGRADO***
+***MAESTRÍA EN INGENIERÍA DE LAS TELECOMUNICACIONES (ITBA)***
+***Herramienta interactiva para evaluar vulnerabilidades en sistemas basados en SIP***
+
 ### Implementa 3 módulos: ###
 *   **Flooder:** Realizar [flooding](http://es.wikipedia.org/wiki/Flood) sobre un objetivo.
 *   **Fuzzer:** Realizar [fuzz testing](http://en.wikipedia.org/wiki/Fuzz_testing) sobre un objetivo.
@@ -147,7 +151,7 @@ Flood 500 Msg from File to 192.168.56.77:
 
 Flood 500 Msg to 192.168.56.77 changing extentions with dictionary:
 
-`python sipot.py --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary examples/example_sipot_ext_dict.txt` 
+`python sipot.py --sipot-mode flooding --to sip:109@192.168.56.77:5060 --flood-number 500 --ext-dictionary examples/example_sipot_ext_dict.txt`
 
 
 ### Fuzzing ###
@@ -252,7 +256,7 @@ Spoofs Caller ID from message provided in file:
 Spoofs BYE msg and spoof BYE from 200 OK:
 
 `python sipot.py --sipot-mode spoofing --spoof spfBYE --to sip:108@192.168.56.101:5060 --spoof-msg-file examples/example_sipot_spoof_bye.txt` (Needs dialogID to be manually set)
-`python sipot.py --sipot-mode spoofing --spoof spfBYE --to sip:108@192.168.56.101:5060 --spoof-msg-file examples/example_sipot_spoof_bye_from_200.txt` 
+`python sipot.py --sipot-mode spoofing --spoof spfBYE --to sip:108@192.168.56.101:5060 --spoof-msg-file examples/example_sipot_spoof_bye_from_200.txt`
 
 Spoofs CANCEL msg and spoof CANCEL from 180 Ringing:
 
@@ -271,10 +275,3 @@ Automatic spoofing BYE/CANCEL when 200 OK/180 RINGING is detected:
 -- Notas --
 [Markup Preview](http://github-markup.dfilimonov.com/)
 [MultiMarkdown](https://github.com/fletcher/MultiMarkdown/blob/master/Documentation/Markdown%20Syntax.md)
-
-
-
-
-
-
-
